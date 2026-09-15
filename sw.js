@@ -1,4 +1,4 @@
-const CACHE = 'fair-ads-spinner-v1';
+const CACHE = 'fair-ads-spinner-v2';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -24,4 +24,8 @@ self.addEventListener('fetch', (e) => {
       }).catch(() => cached)
     )
   );
+});
+
+self.addEventListener('message', (e) => {
+  if (e.data === 'skipWaiting') self.skipWaiting();
 });
