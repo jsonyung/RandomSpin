@@ -7,21 +7,51 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
+    :root, [data-theme="dark"] {
       --bg1: #0f172a;
       --bg2: #1e293b;
+      --bg3: #312e81;
       --card: rgba(255, 255, 255, 0.06);
+      --input-bg: rgba(0, 0, 0, 0.25);
+      --btn-bg: rgba(0, 0, 0, 0.2);
       --border: rgba(255, 255, 255, 0.12);
       --text: #f1f5f9;
       --muted: #94a3b8;
       --accent: #6366f1;
       --accent-hover: #818cf8;
+      --modal-bg1: #1e293b;
+      --modal-bg2: #0f172a;
+      --wheel-center: #1e293b;
+      --shadow: rgba(0, 0, 0, 0.45);
+      --overlay: rgba(0, 0, 0, 0.65);
+      --pointer: #fff;
+    }
+
+    [data-theme="light"] {
+      --bg1: #f1f5f9;
+      --bg2: #e2e8f0;
+      --bg3: #c7d2fe;
+      --card: rgba(255, 255, 255, 0.92);
+      --input-bg: rgba(255, 255, 255, 0.95);
+      --btn-bg: rgba(255, 255, 255, 0.85);
+      --border: rgba(15, 23, 42, 0.12);
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #4f46e5;
+      --accent-hover: #6366f1;
+      --modal-bg1: #ffffff;
+      --modal-bg2: #f8fafc;
+      --wheel-center: #f1f5f9;
+      --shadow: rgba(15, 23, 42, 0.12);
+      --overlay: rgba(15, 23, 42, 0.45);
+      --pointer: #0f172a;
     }
 
     body {
       min-height: 100vh;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 50%, #312e81 100%);
+      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 50%, var(--bg3) 100%);
+      transition: background 0.3s, color 0.3s;
       color: var(--text);
       display: flex;
       align-items: center;
@@ -37,46 +67,51 @@
       border: 1px solid var(--border);
       border-radius: 20px;
       padding: 2rem 1.75rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 25px 50px -12px var(--shadow);
+      transition: background 0.3s, border-color 0.3s;
     }
 
     .header-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 0.75rem;
+      display: grid;
+      grid-template-columns: 38px 1fr 76px;
+      align-items: center;
+      gap: 0.5rem;
       margin-bottom: 0.25rem;
     }
 
     .header-row h1 {
-      flex: 1;
       text-align: center;
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.02em;
     }
 
-    .settings-btn {
+    .header-actions {
+      display: flex;
+      gap: 0.35rem;
+      justify-content: flex-end;
+    }
+
+    .icon-btn {
       flex-shrink: 0;
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 10px;
       border: 1px solid var(--border);
-      background: rgba(0, 0, 0, 0.25);
+      background: var(--input-bg);
       color: var(--muted);
-      font-size: 1.15rem;
+      font-size: 1rem;
       cursor: pointer;
       transition: all 0.2s;
-      margin-top: -2px;
     }
 
-    .settings-btn:hover:not(:disabled) {
+    .icon-btn:hover:not(:disabled) {
       border-color: var(--accent);
       color: var(--text);
-      background: rgba(99, 102, 241, 0.15);
+      background: rgba(99, 102, 241, 0.12);
     }
 
-    .settings-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .icon-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .subtitle {
       text-align: center;
@@ -102,7 +137,7 @@
       padding: 0.75rem 1rem;
       border: 1px solid var(--border);
       border-radius: 10px;
-      background: rgba(0, 0, 0, 0.25);
+      background: var(--input-bg);
       color: var(--text);
       font-size: 1rem;
       outline: none;
@@ -123,7 +158,7 @@
       padding: 0.55rem 0.5rem;
       border: 1px solid var(--border);
       border-radius: 8px;
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--btn-bg);
       color: var(--muted);
       font-size: 0.78rem;
       font-weight: 600;
@@ -147,12 +182,33 @@
       cursor: not-allowed;
     }
 
+    .field-hint {
+      margin-top: 0.45rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
     .mode-hint {
       margin-top: 0.5rem;
       font-size: 0.78rem;
       color: var(--muted);
       line-height: 1.4;
     }
+
+    .help-link {
+      display: inline-block;
+      margin-top: 0.35rem;
+      font-size: 0.76rem;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    .help-link:hover { color: var(--accent-hover); }
 
     .round-info {
       text-align: center;
@@ -177,7 +233,7 @@
       height: 0;
       border-left: 14px solid transparent;
       border-right: 14px solid transparent;
-      border-top: 28px solid #fff;
+      border-top: 28px solid var(--pointer);
       filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
       z-index: 10;
     }
@@ -246,7 +302,7 @@
     .tally-item {
       text-align: center;
       padding: 0.5rem 0.25rem;
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--input-bg);
       border-radius: 8px;
       border: 1px solid var(--border);
     }
@@ -269,7 +325,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: var(--overlay);
       backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
@@ -287,7 +343,7 @@
     }
 
     .modal {
-      background: linear-gradient(160deg, #1e293b, #0f172a);
+      background: linear-gradient(160deg, var(--modal-bg1), var(--modal-bg2));
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 2rem 1.75rem;
@@ -459,19 +515,132 @@
       margin-bottom: 0.75rem;
       min-height: 1.2em;
     }
+
+    .help-section {
+      margin-bottom: 1.1rem;
+      padding-bottom: 1.1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .help-section:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .help-section h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .help-section p,
+    .help-section li {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .help-section ul {
+      margin: 0.35rem 0 0 1.1rem;
+    }
+
+    .help-section li { margin-bottom: 0.25rem; }
+
+    .help-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-top: 1px solid var(--border);
+      margin-top: 0.5rem;
+    }
+
+    .setting-row label {
+      margin: 0;
+      text-transform: none;
+      font-size: 0.9rem;
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--btn-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 2px;
+      top: 2px;
+      background: var(--muted);
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+      background: #fff;
+    }
   </style>
 </head>
-<body>
+<body data-theme="dark">
   <div class="app">
     <div class="header-row">
+      <button type="button" class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle dark or light mode">🌙</button>
       <h1>Fair Ads Spinner</h1>
-      <button type="button" class="settings-btn" id="settingsBtn" title="Settings" aria-label="Open settings">⚙</button>
+      <div class="header-actions">
+        <button type="button" class="icon-btn" id="helpBtn" title="How it works" aria-label="Open help guide">?</button>
+        <button type="button" class="icon-btn" id="settingsBtn" title="Settings" aria-label="Open settings">⚙</button>
+      </div>
     </div>
     <p class="subtitle">Let the wheel decide — no arguments</p>
 
     <div class="field-group">
       <label for="taskInput">Enter Task / Reason to Call</label>
       <input type="text" id="taskInput" placeholder="e.g. Facebook lead, callback request…" autocomplete="off">
+      <p class="field-hint">Type what this lead is for (ad name, callback, etc.). It shows in the result so everyone knows why that person was picked — optional but useful for the team.</p>
     </div>
 
     <div class="field-group">
@@ -482,6 +651,7 @@
         <button type="button" data-mode="weighted">Weighted</button>
       </div>
       <p class="mode-hint" id="modeHint"></p>
+      <button type="button" class="help-link" id="helpLinkModes">Read full guide: Fair Bag vs Random vs Weighted →</button>
     </div>
 
     <div class="field-group">
@@ -525,6 +695,13 @@
       <p class="modal-sub">Edit names, add or remove people. Changes save to this browser. Minimum 2, maximum 12.</p>
       <div class="name-list" id="nameList"></div>
       <button type="button" class="btn-add-name" id="addNameBtn">+ Add Person</button>
+      <div class="setting-row">
+        <label for="soundToggle">Spin sounds</label>
+        <label class="toggle">
+          <input type="checkbox" id="soundToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
       <p class="settings-error" id="settingsError"></p>
       <div class="modal-actions">
         <button type="button" class="btn-danger" id="resetCountsBtn">Reset Counts</button>
@@ -534,8 +711,76 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="modal modal-wide">
+      <p class="modal-title-left" id="helpTitle">📖 How It Works</p>
+      <p class="modal-sub">Everything you need to know about assigning ads and leads fairly.</p>
+
+      <div class="help-section">
+        <span class="help-tag">Task field</span>
+        <h3>Enter Task / Reason to Call</h3>
+        <p>Before you spin, type a short note about this lead — e.g. “Facebook ad lead” or “Missed call callback”. When the wheel stops, the result popup says <strong style="color:var(--text)">“[Name] has been chosen for [your task]!”</strong> so the whole team sees who got it and why. Leave it blank and it will say “this lead” instead.</p>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">Recommended</span>
+        <h3>Fair Bag — equal share, surprise order</h3>
+        <p>Think of four cards in a bag. The app shuffles them, then draws one name per spin without putting it back.</p>
+        <ul>
+          <li>After one full round, each person gets <strong style="color:var(--text)">exactly 1</strong> lead.</li>
+          <li>Then it shuffles a new bag — order is different every round.</li>
+          <li>Not a fixed loop — nobody can predict the whole list from spin 1.</li>
+          <li>Best for: equal ads while looking like the wheel decided.</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">Luck mode</span>
+        <h3>Pure Random — fresh coin flip every spin</h3>
+        <p>Each click is independent. Everyone has the same % chance every time, even if they just won.</p>
+        <ul>
+          <li>Same person can win twice in a row.</li>
+          <li>Over a short stretch, counts may look uneven.</li>
+          <li>Best for: maximum “it was luck” with no rules.</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">Soft balance</span>
+        <h3>Weighted — catch-up for whoever is behind</h3>
+        <p>Still random, but the app remembers session win counts. People with fewer wins get a higher chance next spin; people ahead get lower chance but can still win.</p>
+        <ul>
+          <li>Not a strict 1-each cycle — a soft balancer so nobody stays at zero.</li>
+          <li>Check the scoreboard under the wheel to see counts.</li>
+          <li>Best for: random feel without starving one agent.</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">Speed</span>
+        <h3>Spin Speed</h3>
+        <ul>
+          <li><strong style="color:var(--text)">Quick</strong> (~1 sec) — busy moment, lead just came in.</li>
+          <li><strong style="color:var(--text)">Normal</strong> (~3.5 sec) — good show for the team.</li>
+          <li><strong style="color:var(--text)">Dramatic</strong> (~5.5 sec) — slow settle, extra fair look.</li>
+        </ul>
+        <p>Speed only changes animation — it does not change who wins.</p>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">Scoreboard</span>
+        <h3>Session tally</h3>
+        <p>The numbers under the wheel show how many times each person has won this session (until you refresh or reset counts in Settings).</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-primary" id="helpClose">Got it</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = 'fairAdsSpinner_v1';
+    const STORAGE_KEY = 'fairAdsSpinner_v2';
     const DEFAULT_NAMES = ['Peter', 'Simon', 'Shaun', 'Danny'];
     const MAX_NAMES = 12;
     const MIN_NAMES = 2;
@@ -552,6 +797,8 @@
     const state = {
       mode: 'fairBag',
       speed: 'normal',
+      theme: 'dark',
+      soundEnabled: true,
       currentRotation: 0,
       isSpinning: false,
       wins: {},
@@ -573,8 +820,128 @@
     const modalMessage = document.getElementById('modalMessage');
     const nameListEl = document.getElementById('nameList');
     const settingsError = document.getElementById('settingsError');
+    const helpModal = document.getElementById('helpModal');
+    const themeBtn = document.getElementById('themeBtn');
+    const soundToggle = document.getElementById('soundToggle');
 
-    function getNames() { return names; }
+    const SpinAudio = {
+      ctx: null,
+      tickTimer: null,
+
+      init() {
+        if (!state.soundEnabled) return;
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      },
+
+      playTick() {
+        if (!state.soundEnabled || !this.ctx) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(920, t);
+        osc.frequency.exponentialRampToValueAtTime(480, t + 0.04);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.22, t + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.06);
+      },
+
+      playWhoosh() {
+        if (!state.soundEnabled || !this.ctx) return;
+        const t = this.ctx.currentTime;
+        const bufferSize = this.ctx.sampleRate * 0.25;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        const src = this.ctx.createBufferSource();
+        src.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(400, t);
+        filter.frequency.exponentialRampToValueAtTime(1200, t + 0.15);
+        filter.Q.value = 0.8;
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+        src.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        src.start(t);
+      },
+
+      playWin() {
+        if (!state.soundEnabled || !this.ctx) return;
+        const t = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          const start = t + i * 0.09;
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(0.18, start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.28);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(start);
+          osc.stop(start + 0.3);
+        });
+      },
+
+      startSpin(duration) {
+        this.stopSpin();
+        if (!state.soundEnabled) return;
+        this.init();
+        this.playWhoosh();
+        let elapsed = 0;
+        let interval = 55;
+        const tick = () => {
+          if (elapsed >= duration) return;
+          this.playTick();
+          elapsed += interval / 1000;
+          interval = Math.min(320, interval * 1.08);
+          this.tickTimer = setTimeout(tick, interval);
+        };
+        tick();
+      },
+
+      stopSpin() {
+        if (this.tickTimer) {
+          clearTimeout(this.tickTimer);
+          this.tickTimer = null;
+        }
+      }
+    };
+
+    function applyTheme(theme) {
+      state.theme = theme;
+      document.body.setAttribute('data-theme', theme);
+      themeBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
+      themeBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+      renderWheel();
+    }
+
+    function toggleTheme() {
+      applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+      savePrefs();
+    }
+
+    function openHelp() {
+      if (state.isSpinning) return;
+      helpModal.classList.add('show');
+    }
+
+    function closeHelp() {
+      helpModal.classList.remove('show');
+    }
 
     function modeHintText() {
       const n = names.length;
@@ -598,23 +965,32 @@
       state.wins = next;
     }
 
-    function saveToStorage() {
+    function savePrefs() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ names: [...names] }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          names: [...names],
+          theme: state.theme,
+          soundEnabled: state.soundEnabled
+        }));
       } catch (_) { /* ignore */ }
+    }
+
+    function saveToStorage() {
+      savePrefs();
     }
 
     function loadFromStorage() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('fairAdsSpinner_v1');
         if (!raw) return;
         const data = JSON.parse(raw);
         if (Array.isArray(data.names) && data.names.length >= MIN_NAMES) {
           names = data.names.map(n => String(n).trim()).filter(Boolean).slice(0, MAX_NAMES);
-          if (names.length >= MIN_NAMES) return;
         }
+        if (data.theme === 'light' || data.theme === 'dark') state.theme = data.theme;
+        if (typeof data.soundEnabled === 'boolean') state.soundEnabled = data.soundEnabled;
       } catch (_) { /* ignore */ }
-      names = [...DEFAULT_NAMES];
+      if (names.length < MIN_NAMES) names = [...DEFAULT_NAMES];
     }
 
     function fisherYates(arr) {
@@ -709,7 +1085,8 @@
         svg += `<path d="${describeArc(cx, cy, outerR, start, end)}" fill="${color}" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>`;
       }
 
-      svg += `<circle cx="${cx}" cy="${cy}" r="${innerR}" fill="#1e293b" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>`;
+      const centerColor = getComputedStyle(document.body).getPropertyValue('--wheel-center').trim() || '#1e293b';
+      svg += `<circle cx="${cx}" cy="${cy}" r="${innerR}" fill="${centerColor}" stroke="rgba(128,128,128,0.25)" stroke-width="1"/>`;
 
       for (let i = 0; i < n; i++) {
         const mid = (i + 0.5) * seg;
@@ -749,6 +1126,8 @@
     function setControlsDisabled(disabled) {
       spinBtn.disabled = disabled;
       document.getElementById('settingsBtn').disabled = disabled;
+      document.getElementById('helpBtn').disabled = disabled;
+      themeBtn.disabled = disabled;
       document.querySelectorAll('#modeButtons button, #speedButtons button').forEach(btn => {
         btn.disabled = disabled;
       });
@@ -781,6 +1160,9 @@
       state.isSpinning = true;
       setControlsDisabled(true);
 
+      SpinAudio.init();
+      SpinAudio.startSpin(duration);
+
       wheelRotator.style.transition = `transform ${duration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
       wheelRotator.style.transform = `rotate(${targetRotation}deg)`;
       state.currentRotation = targetRotation;
@@ -788,6 +1170,9 @@
       const onEnd = (e) => {
         if (e.propertyName !== 'transform') return;
         wheelRotator.removeEventListener('transitionend', onEnd);
+
+        SpinAudio.stopSpin();
+        SpinAudio.playWin();
 
         state.wins[winner]++;
         renderTally();
@@ -820,6 +1205,7 @@
       if (state.isSpinning) return;
       settingsDraft = [...names];
       settingsError.textContent = '';
+      soundToggle.checked = state.soundEnabled;
       renderSettingsList();
       settingsModal.classList.add('show');
     }
@@ -900,6 +1286,19 @@
 
     document.getElementById('settingsBtn').addEventListener('click', openSettings);
     document.getElementById('settingsCancel').addEventListener('click', closeSettings);
+    document.getElementById('helpBtn').addEventListener('click', openHelp);
+    document.getElementById('helpLinkModes').addEventListener('click', openHelp);
+    document.getElementById('helpClose').addEventListener('click', closeHelp);
+    themeBtn.addEventListener('click', toggleTheme);
+
+    soundToggle.addEventListener('change', () => {
+      state.soundEnabled = soundToggle.checked;
+      savePrefs();
+    });
+
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) closeHelp();
+    });
 
     document.getElementById('modeButtons').addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-mode]');
@@ -938,10 +1337,13 @@
       if (e.key === 'Escape') {
         hideResultModal();
         closeSettings();
+        closeHelp();
       }
     });
 
     loadFromStorage();
+    applyTheme(state.theme);
+    soundToggle.checked = state.soundEnabled;
     initWins();
     initFairBag();
     renderWheel();
