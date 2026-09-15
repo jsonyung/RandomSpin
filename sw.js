@@ -1,5 +1,21 @@
-const CACHE = 'fair-ads-spinner-v3';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'fair-ads-spinner-v4';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './css/main.css',
+  './css/variables.css',
+  './css/layout.css',
+  './js/main.js',
+  './js/config.js',
+  './js/state.js',
+  './js/dom.js',
+  './js/app-logic.js',
+  './js/events.js',
+  './js/init.js',
+  './icon-192.png',
+  './icon-512.png'
+];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

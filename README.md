@@ -4,51 +4,53 @@ Spin the wheel to fairly assign ads and leads to your team. Works offline as a P
 
 **Live:** [jsonyung.github.io/RandomSpin](https://jsonyung.github.io/RandomSpin/)
 
+## Project structure
+
+```
+RandomSpin/
+├── index.html          # App shell (HTML only)
+├── css/
+│   ├── main.css        # Entry — imports variables + layout
+│   ├── variables.css   # Theme tokens (dark / light)
+│   └── layout.css      # Components, pages, responsive
+├── js/
+│   ├── main.js         # Entry point
+│   ├── config.js       # Constants (modes, colors, limits)
+│   ├── state.js        # Mutable state + session vars
+│   ├── dom.js          # DOM element bindings
+│   ├── app-logic.js    # Core logic (wheel, modes, storage, UI)
+│   ├── events.js       # Event listeners
+│   └── init.js         # Bootstrap on load
+├── tools/              # Dev scripts (not shipped to users)
+├── manifest.webmanifest
+├── sw.js               # Service worker (offline cache)
+└── icon-192.png, icon-512.png
+```
+
+No build step — ES modules load directly on GitHub Pages.
+
 ## Quick start
 
-1. Open the app → complete the 30-second tour (or tap **?** anytime)
-2. **Settings ⚙** → set team names, task/reason, and mode (**Fair Bag** recommended)
-3. When a lead comes in → **SPIN** or press **Space**
-4. **Copy Result** → paste in Slack/WhatsApp
-
-## Fairness modes
-
-| Mode | Use when |
-|------|----------|
-| **Fair Bag** | Equal ads — everyone gets 1 per round, shuffled order |
-| **Pure Random** | True luck — no balance rules |
-| **Weighted** | Soft catch-up for whoever is behind |
-| **Anti-Repeat / Last Excluded / Lowest First / Strict Balance** | Extra control |
+1. Open the app → complete the tour or tap **?**
+2. **Settings ⚙** → team names, task, **Fair Bag** mode
+3. **SPIN** or Space when a lead comes in
+4. **Copy Result** → paste in chat
 
 ## Features
 
-- **Fair Bag preview** — see who's still in this round + who's next
-- **Recent task chips** on home — tap to reuse last tasks
-- **Which mode?** wizard — pick fairness mode in 1 tap
-- **Today's summary** + **weekly report** — copy for Slack/manager
-- **History chart** + filter by task + export filtered CSV
-- **Share result** — native share or WhatsApp
-- **Sound volume**, require task before spin, PIN on reset counts
-- Task presets, spin history (500), daily count reset, undo last spin
-- Full backup import/export (no backend needed)
-- Shareable team URL: `?names=Peter,Simon&mode=fairBag&speed=normal&task=Facebook+lead`
+- 7 fairness modes (Fair Bag, Pure Random, Weighted, + extras)
+- Fair Bag round preview, recent tasks, mode wizard
+- History chart, filters, CSV export, undo last spin
+- PIN lock, daily reset, full backup import/export
+- PWA — install for offline use
 
-## Future ideas (no backend)
+## Local development
 
-- Gamification: streaks, badges, XP per lead handled
-- Custom wheel themes / team branding
-- Optional cloud sync when you're ready
-
-## Install (mobile / desktop)
-
-Browser menu → **Add to Home Screen** / **Install app**
-
-## Files
-
-- `index.html` — entire app (HTML, CSS, JS)
-- `manifest.webmanifest` — PWA manifest
-- `sw.js` — offline service worker
-- `icon-192.png`, `icon-512.png` — app icons
+```bash
+# Any static server, e.g.:
+python3 -m http.server 8765
+# Open http://localhost:8765
+```
 
 ## License
 
