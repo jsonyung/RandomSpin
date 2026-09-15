@@ -1006,7 +1006,7 @@
         <button type="button" class="icon-btn" id="settingsBtn" title="Settings — task, team, modes" aria-label="Open settings">⚙</button>
       </div>
     </div>
-    <p class="subtitle" id="homeSubtitle">Tap SPIN or press Space · Set task in ⚙ Settings</p>
+    <p class="subtitle" id="homeSubtitle">Space = spin · Space again closes result &amp; re-spins</p>
 
     <div class="status-bar" id="statusBar">
       <span class="status-pill accent" id="statusMode">Fair Bag</span>
@@ -1188,7 +1188,7 @@
         <span class="help-tag">Quick start</span>
         <h3>Home screen</h3>
         <ul>
-          <li><strong style="color:var(--text)">SPIN</strong> or <strong style="color:var(--text)">Space</strong> — pick someone when a lead comes in.</li>
+          <li><strong style="color:var(--text)">SPIN</strong> or <strong style="color:var(--text)">Space</strong> — pick someone when a lead comes in. <strong style="color:var(--text)">Space again</strong> closes the result popup and spins immediately.</li>
           <li><strong style="color:var(--text)">Pills</strong> — show mode, speed, current task, and round progress (Fair Bag).</li>
           <li><strong style="color:var(--text)">?</strong> — this guide · <strong style="color:var(--text)">🕐</strong> — spin history · <strong style="color:var(--text)">⚙</strong> — all settings.</li>
           <li><strong style="color:var(--text)">🔒</strong> — mode/speed locked until PIN entered (Settings → PIN Lock).</li>
@@ -2622,8 +2622,10 @@
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
         if (settingsPage.classList.contains('open') || historyPage.classList.contains('open')) return;
         if (helpModal.classList.contains('show') || pinModal.classList.contains('show')) return;
-        if (resultModal.classList.contains('show')) return;
         e.preventDefault();
+        if (resultModal.classList.contains('show')) {
+          hideResultModal();
+        }
         spin();
       }
     });
