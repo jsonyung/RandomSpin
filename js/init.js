@@ -1,4 +1,4 @@
-import { state, tourStep, TOUR_STEPS } from './state.js';
+import { state, TOUR_STEPS } from './state.js';
 import * as app from './app-logic.js';
 
 export function bootstrap() {

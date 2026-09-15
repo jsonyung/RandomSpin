@@ -3,11 +3,7 @@ import {
   DEFAULT_NAMES, DEFAULT_PRESETS, MAX_NAMES, MIN_NAMES, MAX_HISTORY, HISTORY_DEFAULT_SHOW,
   SEG_COLORS, SPEED_CONFIG
 } from './config.js';
-import {
-  state, names, settingsDraft, settingsDraftExcluded, historyShowAll, pendingPinAction,
-  lastResultText, lastSlackText, pinUnlockBuffer, dailyResetTimer, undoSnapshot,
-  settingsSaveTimer, deferredInstallPrompt, tourStep, swRegistration, TOUR_STEPS
-} from './state.js';
+import { state, TOUR_STEPS } from './state.js';
 import { el } from './dom.js';
 
 export const SpinAudio = {
@@ -220,12 +216,12 @@ export function requirePinUnlock(action) {
     action();
     return;
   }
-  pendingPinAction = action;
+  state.pendingPinAction = action;
   openPinModal();
 }
 
 export function openPinModal() {
-  pinUnlockBuffer = '';
+  state.pinUnlockBuffer = '';
   document.getElementById('pinError').textContent = '';
   updatePinDots();
   el.pinModal.classList.add('show');
@@ -234,14 +230,14 @@ export function openPinModal() {
 
 export function closePinModal() {
   el.pinModal.classList.remove('show');
-  pinUnlockBuffer = '';
+  state.pinUnlockBuffer = '';
   updatePinDots();
-  pendingPinAction = null;
+  state.pendingPinAction = null;
 }
 
 export function updatePinDots() {
   document.querySelectorAll('#pinDots .pin-dot').forEach((dot, i) => {
-    dot.classList.toggle('filled', i < pinUnlockBuffer.length);
+    dot.classList.toggle('filled', i < state.pinUnlockBuffer.length);
   });
 }
 
@@ -250,9 +246,9 @@ export async function tryPinUnlock(digits) {
     state.pinUnlocked = true;
     updateLockUI();
     closePinModal();
-    if (pendingPinAction) {
-      const fn = pendingPinAction;
-      pendingPinAction = null;
+    if (state.pendingPinAction) {
+      const fn = state.pendingPinAction;
+      state.pendingPinAction = null;
       fn();
     }
     if (el.settingsPage.classList.contains('open')) {
@@ -262,16 +258,16 @@ export async function tryPinUnlock(digits) {
     }
   } else {
     document.getElementById('pinError').textContent = 'Incorrect PIN. Try again.';
-    pinUnlockBuffer = '';
+    state.pinUnlockBuffer = '';
     updatePinDots();
   }
 }
 
 export function handlePinKey(digit) {
-  if (pinUnlockBuffer.length >= 4) return;
-  pinUnlockBuffer += digit;
+  if (state.pinUnlockBuffer.length >= 4) return;
+  state.pinUnlockBuffer += digit;
   updatePinDots();
-  if (pinUnlockBuffer.length === 4) tryPinUnlock(pinUnlockBuffer);
+  if (state.pinUnlockBuffer.length === 4) tryPinUnlock(state.pinUnlockBuffer);
 }
 
 export function resolveTheme(theme) {
@@ -325,7 +321,7 @@ export function updateLastResultStrip() {
   const task = e.task || 'this lead';
   const when = formatRelativeTime(e.timestamp);
   el.lastResultStrip.innerHTML = `Last: <strong>${escapeHtml(e.winner)}</strong> · ${escapeHtml(task)} · ${when}` +
-    (undoSnapshot ? ` <button type="button" id="undoFromStrip">Undo</button>` : '');
+    (state.undoSnapshot ? ` <button type="button" id="undoFromStrip">Undo</button>` : '');
   const undoBtn = document.getElementById('undoFromStrip');
   if (undoBtn) undoBtn.addEventListener('click', undoLastSpin);
 }
@@ -395,11 +391,11 @@ export function buildDaySummary() {
   const today = getTodayHistory();
   const dateStr = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
   const lines = [`📊 Fair Ads Spinner — ${dateStr}`, ''];
-  lines.push(`Mode: ${MODE_LABELS[state.mode]} · Team: ${names.join(', ')}`);
+  lines.push(`Mode: ${MODE_LABELS[state.mode]} · Team: ${state.names.join(', ')}`);
   lines.push('', 'Today\'s tally:');
   const counts = {};
   today.forEach(e => { counts[e.winner] = (counts[e.winner] || 0) + 1; });
-  names.forEach(n => lines.push(`  ${n}: ${counts[n] || 0} lead${counts[n] === 1 ? '' : 's'}`));
+  state.names.forEach(n => lines.push(`  ${n}: ${counts[n] || 0} lead${counts[n] === 1 ? '' : 's'}`));
   lines.push('', `Total spins today: ${today.length}`);
   if (today.length) {
     lines.push('', 'Log:');
@@ -424,7 +420,7 @@ export function buildWeeklyReport() {
   lines.push('', 'Assignments this week:');
   const counts = {};
   week.forEach(e => { counts[e.winner] = (counts[e.winner] || 0) + 1; });
-  names.forEach(n => lines.push(`  ${n}: ${counts[n] || 0}`));
+  state.names.forEach(n => lines.push(`  ${n}: ${counts[n] || 0}`));
   const byTask = {};
   week.forEach(e => {
     const t = e.task || '(no task)';
@@ -451,7 +447,7 @@ export async function copyWeeklyReport() {
 }
 
 export async function shareResult() {
-  const text = lastResultText;
+  const text = state.lastResultText;
   if (navigator.share) {
     try {
       await navigator.share({ title: 'Lead assignment', text });
@@ -499,7 +495,7 @@ export function applyWizardChoice(idx) {
     showHomeToast(`Mode set to ${MODE_LABELS[opt.mode]}`);
   };
   if (state.pinEnabled && !state.pinUnlocked) {
-    pendingPinAction = apply;
+    state.pendingPinAction = apply;
     openPinModal();
     return;
   }
@@ -516,7 +512,7 @@ export function closeHelp() {
 }
 
 export function modeHintText() {
-  const n = getEligibleNames().length || names.length;
+  const n = getEligibleNames().length || state.names.length;
   const pct = Math.round(100 / Math.max(n, 1));
   return {
     fairBag: `Recommended — shuffled deck, everyone gets exactly 1 per round of ${n}.`,
@@ -542,20 +538,20 @@ export function syncModeButtons() {
 
 export function initWins(keepExisting = false) {
   const next = {};
-  names.forEach(n => {
+  state.names.forEach(n => {
     next[n] = keepExisting && state.wins[n] != null ? state.wins[n] : 0;
   });
   state.wins = next;
 }
 
 export function getEligibleNames() {
-  return names.filter(n => !state.excluded[n]);
+  return state.names.filter(n => !state.excluded[n]);
 }
 
 export function savePrefs() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      names: [...names],
+      names: [...state.names],
       theme: state.theme,
       soundEnabled: state.soundEnabled,
       confettiEnabled: state.confettiEnabled,
@@ -599,7 +595,7 @@ export function loadFromStorage() {
     if (!raw) return;
     const data = JSON.parse(raw);
     if (Array.isArray(data.names) && data.names.length >= MIN_NAMES) {
-      names = data.names.map(n => String(n).trim()).filter(Boolean).slice(0, MAX_NAMES);
+      state.names = data.names.map(n => String(n).trim()).filter(Boolean).slice(0, MAX_NAMES);
     }
     if (data.theme === 'light' || data.theme === 'dark' || data.theme === 'auto') state.theme = data.theme;
     if (typeof data.soundEnabled === 'boolean') state.soundEnabled = data.soundEnabled;
@@ -628,7 +624,7 @@ export function loadFromStorage() {
     if (typeof data.requireTaskBeforeSpin === 'boolean') state.requireTaskBeforeSpin = data.requireTaskBeforeSpin;
     if (typeof data.pinLockResetCounts === 'boolean') state.pinLockResetCounts = data.pinLockResetCounts;
   } catch (_) { /* ignore */ }
-  if (names.length < MIN_NAMES) names = [...DEFAULT_NAMES];
+  if (state.names.length < MIN_NAMES) state.names = [...DEFAULT_NAMES];
   if (!state.taskPresets.length) state.taskPresets = [...DEFAULT_PRESETS];
 }
 
@@ -636,7 +632,7 @@ export function applyUrlParams() {
   const params = new URLSearchParams(window.location.search);
   if (params.has('names')) {
     const parsed = params.get('names').split(',').map(s => s.trim()).filter(Boolean);
-    if (parsed.length >= MIN_NAMES) names = parsed.slice(0, MAX_NAMES);
+    if (parsed.length >= MIN_NAMES) state.names = parsed.slice(0, MAX_NAMES);
   }
   const mode = params.get('mode');
   if (mode && VALID_MODES.includes(mode)) state.mode = mode;
@@ -657,14 +653,14 @@ export function fisherYates(arr) {
 
 export function initFairBag() {
   state.fairBagDeck = fisherYates(getEligibleNames());
-  if (state.fairBagDeck.length === 0) state.fairBagDeck = fisherYates(names);
+  if (state.fairBagDeck.length === 0) state.fairBagDeck = fisherYates(state.names);
   state.fairBagRound = 1;
   state.fairBagSpinInRound = 0;
 }
 
 export function refillFairBagDeck() {
   state.fairBagDeck = fisherYates(getEligibleNames());
-  if (state.fairBagDeck.length === 0) state.fairBagDeck = fisherYates(names);
+  if (state.fairBagDeck.length === 0) state.fairBagDeck = fisherYates(state.names);
   state.fairBagSpinInRound = 0;
   state.fairBagRound++;
 }
@@ -676,17 +672,17 @@ export function pickFairBag() {
 }
 
 export function pickFromPool(pool) {
-  if (!pool.length) pool = [...names];
+  if (!pool.length) pool = [...state.names];
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
 export function pickPureRandom() {
   const pool = getEligibleNames();
-  return pickFromPool(pool.length ? pool : names);
+  return pickFromPool(pool.length ? pool : state.names);
 }
 
 export function pickWeighted() {
-  const pool = getEligibleNames().length ? getEligibleNames() : names;
+  const pool = getEligibleNames().length ? getEligibleNames() : state.names;
   const weights = pool.map(n => 1 / (state.wins[n] + 1));
   const total = weights.reduce((s, w) => s + w, 0);
   let r = Math.random() * total;
@@ -698,32 +694,32 @@ export function pickWeighted() {
 }
 
 export function pickAntiRepeat() {
-  let pool = getEligibleNames().length ? getEligibleNames() : [...names];
+  let pool = getEligibleNames().length ? getEligibleNames() : [...state.names];
   if (state.lastWinner && pool.length > 1) {
     pool = pool.filter(n => n !== state.lastWinner);
-    if (!pool.length) pool = getEligibleNames().length ? getEligibleNames() : [...names];
+    if (!pool.length) pool = getEligibleNames().length ? getEligibleNames() : [...state.names];
   }
   return pickFromPool(pool);
 }
 
 export function pickLastExcluded() {
-  let pool = getEligibleNames().length ? getEligibleNames() : [...names];
+  let pool = getEligibleNames().length ? getEligibleNames() : [...state.names];
   if (state.lastWinner && pool.length > 1) {
     pool = pool.filter(n => n !== state.lastWinner);
-    if (!pool.length) pool = names.filter(n => n !== state.lastWinner);
+    if (!pool.length) pool = state.names.filter(n => n !== state.lastWinner);
   }
-  return pickFromPool(pool.length ? pool : names);
+  return pickFromPool(pool.length ? pool : state.names);
 }
 
 export function pickLowestFirst() {
-  const pool = getEligibleNames().length ? getEligibleNames() : names;
+  const pool = getEligibleNames().length ? getEligibleNames() : state.names;
   const minWins = Math.min(...pool.map(n => state.wins[n] ?? 0));
   const tied = pool.filter(n => (state.wins[n] ?? 0) === minWins);
   return pickFromPool(tied);
 }
 
 export function pickStrictBalance() {
-  const pool = getEligibleNames().length ? getEligibleNames() : names;
+  const pool = getEligibleNames().length ? getEligibleNames() : state.names;
   const minWins = Math.min(...pool.map(n => state.wins[n] ?? 0));
   const tied = pool.filter(n => (state.wins[n] ?? 0) === minWins);
   const oldest = Math.min(...tied.map(n => lastWinTimestamp(n)));
@@ -759,7 +755,7 @@ export function addHistoryEntry(winner, task, id) {
 }
 
 export function segmentSize() {
-  return 360 / names.length;
+  return 360 / state.names.length;
 }
 
 export function landingAngleForIndex(index) {
@@ -787,12 +783,12 @@ export function fitFontSize(name, segDeg) {
 }
 
 export function nameColor(name) {
-  const idx = names.indexOf(name);
+  const idx = state.names.indexOf(name);
   return SEG_COLORS[(idx >= 0 ? idx : 0) % SEG_COLORS.length];
 }
 
 export function renderWheel() {
-  const n = names.length;
+  const n = state.names.length;
   const seg = 360 / n;
   const cx = 100, cy = 100, outerR = 96, innerR = 38;
   let svg = '';
@@ -802,7 +798,7 @@ export function renderWheel() {
   for (let i = 0; i < n; i++) {
     const start = i * seg;
     const end = (i + 1) * seg;
-    const excluded = !!state.excluded[names[i]];
+    const excluded = !!state.excluded[state.names[i]];
     const color = excluded ? '#64748b' : SEG_COLORS[i % SEG_COLORS.length];
     const opacity = excluded ? ' opacity="0.45"' : '';
     svg += `<path d="${describeArc(cx, cy, outerR, start, end)}" fill="${color}"${opacity} stroke="rgba(255,255,255,0.15)" stroke-width="0.6"/>`;
@@ -821,10 +817,10 @@ export function renderWheel() {
   for (let i = 0; i < n; i++) {
     const mid = (i + 0.5) * seg;
     const pos = polarToCartesian(cx, cy, 66, mid);
-    const fs = fitFontSize(names[i], seg);
+    const fs = fitFontSize(state.names[i], seg);
     let rot = mid;
     if (mid > 90 && mid < 270) rot += 180;
-    svg += `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" stroke="rgba(0,0,0,0.35)" stroke-width="2" paint-order="stroke" transform="rotate(${rot}, ${pos.x}, ${pos.y})">${escapeHtml(names[i])}</text>`;
+    svg += `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" stroke="rgba(0,0,0,0.35)" stroke-width="2" paint-order="stroke" transform="rotate(${rot}, ${pos.x}, ${pos.y})">${escapeHtml(state.names[i])}</text>`;
   }
 
   el.wheelSvg.innerHTML = svg;
@@ -835,9 +831,9 @@ export function escapeHtml(str) {
 }
 
 export function renderTally() {
-  el.tallyEl.style.gridTemplateColumns = `repeat(${Math.min(names.length, 4)}, 1fr)`;
-  const maxWins = Math.max(0, ...names.map((name) => state.wins[name] || 0));
-  el.tallyEl.innerHTML = names.map((name, i) => {
+  el.tallyEl.style.gridTemplateColumns = `repeat(${Math.min(state.names.length, 4)}, 1fr)`;
+  const maxWins = Math.max(0, ...state.names.map((name) => state.wins[name] || 0));
+  el.tallyEl.innerHTML = state.names.map((name, i) => {
     const color = SEG_COLORS[i % SEG_COLORS.length];
     const count = state.wins[name] || 0;
     const leader = maxWins > 0 && count === maxWins;
@@ -889,7 +885,7 @@ export function updateStatusBar() {
     el.statusTask.style.display = 'none';
   }
   if (state.mode === 'fairBag') {
-    const eligible = getEligibleNames().length || names.length;
+    const eligible = getEligibleNames().length || state.names.length;
     const spin = state.fairBagSpinInRound === 0 ? 1 : state.fairBagSpinInRound;
     el.wheelRoundBadge.innerHTML = `<span aria-hidden="true">↻</span> Round ${state.fairBagRound} · ${spin}/${eligible}`;
     el.wheelRoundBadge.style.display = '';
@@ -915,8 +911,8 @@ export function setControlsDisabled(disabled) {
 
 export function showResultModal(winner, task) {
   const taskLabel = task.trim() || 'this lead';
-  lastResultText = `${winner} has been chosen for ${taskLabel}!`;
-  lastSlackText = `@${winner} — ${taskLabel} (via Fair Ads Spinner)`;
+  state.lastResultText = `${winner} has been chosen for ${taskLabel}!`;
+  state.lastSlackText = `@${winner} — ${taskLabel} (via Fair Ads Spinner)`;
   const color = nameColor(winner);
   el.modalWinner.textContent = winner;
   el.modalWinnerAvatar.textContent = winner.charAt(0).toUpperCase();
@@ -924,7 +920,7 @@ export function showResultModal(winner, task) {
   el.modalTask.textContent = taskLabel;
   el.modalMessage.textContent = `${winner} has been chosen for ${taskLabel}`;
   document.getElementById('modalMeta').innerHTML = `<span aria-hidden="true">ℹ</span> ${MODE_LABELS[state.mode]} · ${SPEED_LABELS[state.speed]} · New spin available immediately`;
-  document.getElementById('modalUndo').style.display = undoSnapshot ? '' : 'none';
+  document.getElementById('modalUndo').style.display = state.undoSnapshot ? '' : 'none';
   el.resultModal.classList.add('show');
   announceWinner(winner, task);
   Confetti.burst();
@@ -940,7 +936,7 @@ export function hideResultModal() {
 }
 
 export function spin() {
-  if (state.isSpinning || names.length < MIN_NAMES) return;
+  if (state.isSpinning || state.names.length < MIN_NAMES) return;
   const eligible = getEligibleNames();
   if (!eligible.length) {
     showHomeToast('Everyone is excluded — uncheck Exclude in Settings.');
@@ -951,7 +947,7 @@ export function spin() {
     return;
   }
 
-  undoSnapshot = null;
+  state.undoSnapshot = null;
   const preSpin = {
     wins: JSON.parse(JSON.stringify(state.wins)),
     lastWinner: state.lastWinner,
@@ -962,7 +958,7 @@ export function spin() {
   };
 
   const winner = pickWinner();
-  const winnerIndex = names.indexOf(winner);
+  const winnerIndex = state.names.indexOf(winner);
   const { duration, extraTurns } = getSpinConfig();
 
   const landing = landingAngleForIndex(winnerIndex);
@@ -989,7 +985,7 @@ export function spin() {
     SpinAudio.playWin();
 
     const entryId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    undoSnapshot = { winner, entryId, ...preSpin };
+    state.undoSnapshot = { winner, entryId, ...preSpin };
 
     state.wins[winner]++;
     state.lastWinner = winner;
@@ -1008,14 +1004,14 @@ export function spin() {
 
 export function renderSettingsList() {
   el.nameListEl.innerHTML = '';
-  settingsDraft.forEach((name, idx) => {
+  state.settingsDraft.forEach((name, idx) => {
     const wrap = document.createElement('div');
     wrap.className = 'name-row-wrap';
-    const excluded = !!settingsDraftExcluded[name];
+    const excluded = !!state.settingsDraftExcluded[name];
     wrap.innerHTML = `
       <div class="name-row">
         <input type="text" value="${escapeHtml(name)}" data-idx="${idx}" maxlength="24" aria-label="Person name">
-        <button type="button" class="btn-remove" data-idx="${idx}" title="Remove" ${settingsDraft.length <= MIN_NAMES ? 'disabled' : ''}>×</button>
+        <button type="button" class="btn-remove" data-idx="${idx}" title="Remove" ${state.settingsDraft.length <= MIN_NAMES ? 'disabled' : ''}>×</button>
       </div>
       <label class="exclude-label">
         <input type="checkbox" class="exclude-cb" data-name="${escapeHtml(name)}" ${excluded ? 'checked' : ''}>
@@ -1089,15 +1085,15 @@ export function renderHistoryStats() {
 }
 
 export function undoLastSpin() {
-  if (!undoSnapshot || state.isSpinning) return;
-  const snap = undoSnapshot;
+  if (!state.undoSnapshot || state.isSpinning) return;
+  const snap = state.undoSnapshot;
   state.history = state.history.filter(e => e.id !== snap.entryId);
   state.wins = snap.wins;
   state.lastWinner = snap.lastWinner;
   state.fairBagDeck = [...snap.fairBagDeck];
   state.fairBagRound = snap.fairBagRound;
   state.fairBagSpinInRound = snap.fairBagSpinInRound;
-  undoSnapshot = null;
+  state.undoSnapshot = null;
   savePrefs();
   renderTally();
   renderWheel();
@@ -1111,7 +1107,7 @@ export function renderHistoryChart() {
   const filtered = getFilteredHistory();
   const counts = {};
   filtered.forEach(e => { counts[e.winner] = (counts[e.winner] || 0) + 1; });
-  const entries = names.map(n => [n, counts[n] || 0]).sort((a, b) => b[1] - a[1]);
+  const entries = state.names.map(n => [n, counts[n] || 0]).sort((a, b) => b[1] - a[1]);
   const max = Math.max(1, ...entries.map(e => e[1]));
   if (!filtered.length) { el.historyChart.innerHTML = ''; return; }
   el.historyChart.innerHTML = entries.map(([name, count]) => `
@@ -1138,7 +1134,7 @@ export function renderHistoryList() {
   renderHistoryStats();
   renderHistoryChart();
   const filtered = getFilteredHistory();
-  const limit = historyShowAll ? filtered.length : HISTORY_DEFAULT_SHOW;
+  const limit = state.historyShowAll ? filtered.length : HISTORY_DEFAULT_SHOW;
   const shown = filtered.slice(0, limit);
   const showAllBtn = el.showAllHistoryBtn;
 
@@ -1160,7 +1156,7 @@ export function renderHistoryList() {
     `;
   }).join('');
 
-  if (filtered.length > HISTORY_DEFAULT_SHOW && !historyShowAll) {
+  if (filtered.length > HISTORY_DEFAULT_SHOW && !state.historyShowAll) {
     showAllBtn.style.display = '';
     showAllBtn.textContent = `Show all (${filtered.length})`;
   } else {
@@ -1170,7 +1166,7 @@ export function renderHistoryList() {
 
 export function openHistory() {
   if (state.isSpinning) return;
-  historyShowAll = false;
+  state.historyShowAll = false;
   el.historySearch.value = '';
   el.historyFilterDate.value = '';
   el.historyFilterTask.value = '';
@@ -1223,7 +1219,7 @@ export function exportHistoryCSV(useFilter = false) {
 
 export function exportTallyCSV() {
   const rows = [['Name', 'Wins', 'Excluded']];
-  names.forEach(n => rows.push([n, state.wins[n] ?? 0, state.excluded[n] ? 'Yes' : 'No']));
+  state.names.forEach(n => rows.push([n, state.wins[n] ?? 0, state.excluded[n] ? 'Yes' : 'No']));
   downloadCSV('fair-ads-tally.csv', rows);
 }
 
@@ -1233,7 +1229,7 @@ export function buildSummaryText() {
   const task = el.taskInputSettings.value.trim();
   if (task) lines.push(`Current task: ${task}`);
   lines.push('', 'Tally:');
-  names.forEach(n => lines.push(`  ${n}: ${state.wins[n] ?? 0}${state.excluded[n] ? ' (excluded)' : ''}`));
+  state.names.forEach(n => lines.push(`  ${n}: ${state.wins[n] ?? 0}${state.excluded[n] ? ' (excluded)' : ''}`));
   if (state.history.length) {
     lines.push('', `Recent spins (${Math.min(5, state.history.length)}):`);
     state.history.slice(0, 5).forEach(e => {
@@ -1255,14 +1251,14 @@ export async function copySummaryText() {
 
 export async function copyResultText() {
   try {
-    await navigator.clipboard.writeText(lastResultText);
+    await navigator.clipboard.writeText(state.lastResultText);
   } catch (_) { /* ignore */ }
 }
 
 export function buildTeamLink() {
   const base = window.location.href.split('?')[0];
   const params = new URLSearchParams();
-  params.set('names', names.join(','));
+  params.set('names', state.names.join(','));
   params.set('mode', state.mode);
   params.set('speed', state.speed);
   const task = el.taskInputSettings.value.trim();
@@ -1284,8 +1280,8 @@ export async function copyTeamLink() {
 
 export function doResetSessionCounts() {
   if (!confirm('Reset all session win counts to zero? History is kept.')) return;
-  names.forEach(n => { state.wins[n] = 0; });
-  undoSnapshot = null;
+  state.names.forEach(n => { state.wins[n] = 0; });
+  state.undoSnapshot = null;
   initFairBag();
   renderTally();
   updateStatusBar();
@@ -1297,7 +1293,7 @@ export function doResetSessionCounts() {
 
 export function resetSessionCounts() {
   if (state.pinEnabled && state.pinLockResetCounts && !state.pinUnlocked) {
-    pendingPinAction = doResetSessionCounts;
+    state.pendingPinAction = doResetSessionCounts;
     openPinModal();
     return;
   }
@@ -1320,15 +1316,15 @@ export function checkDailyReset() {
 }
 
 export function startDailyResetTimer() {
-  if (dailyResetTimer) clearInterval(dailyResetTimer);
+  if (state.dailyResetTimer) clearInterval(state.dailyResetTimer);
   checkDailyReset();
-  dailyResetTimer = setInterval(checkDailyReset, 60000);
+  state.dailyResetTimer = setInterval(checkDailyReset, 60000);
 }
 
 export function openSettings() {
   if (state.isSpinning) return;
-  settingsDraft = [...names];
-  settingsDraftExcluded = { ...state.excluded };
+  state.settingsDraft = [...state.names];
+  state.settingsDraftExcluded = { ...state.excluded };
   el.settingsError.textContent = '';
   syncSettingsToggles();
   syncModeSpeedUI();
@@ -1346,7 +1342,7 @@ export function closeSettings() {
   el.settingsPage.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
   el.settingsError.textContent = '';
-  settingsDraft = [...names];
+  state.settingsDraft = [...state.names];
 }
 
 export function validateNames(list) {
@@ -1369,8 +1365,8 @@ export function persistSettingsDraft() {
   el.settingsError.textContent = '';
   const trimmed = draft.map(n => n.trim());
   const newExcluded = collectDraftExcluded(trimmed);
-  const namesChanged = trimmed.length !== names.length ||
-    trimmed.some((n, i) => n !== names[i]);
+  const namesChanged = trimmed.length !== state.names.length ||
+    trimmed.some((n, i) => n !== state.names[i]);
   const excludeChanged = trimmed.some(n => !!state.excluded[n] !== !!newExcluded[n]);
 
   if (namesChanged) {
@@ -1383,14 +1379,14 @@ export function persistSettingsDraft() {
     updateStatusBar();
     savePrefs();
   }
-  settingsDraft = [...names];
-  settingsDraftExcluded = { ...state.excluded };
+  state.settingsDraft = [...state.names];
+  state.settingsDraftExcluded = { ...state.excluded };
   return true;
 }
 
 export function scheduleSettingsSave() {
-  clearTimeout(settingsSaveTimer);
-  settingsSaveTimer = setTimeout(() => {
+  clearTimeout(state.settingsSaveTimer);
+  state.settingsSaveTimer = setTimeout(() => {
     if (persistSettingsDraft()) showSettingsToast('Team saved.');
   }, 600);
 }
@@ -1399,7 +1395,7 @@ export function buildBackupData() {
   return {
     version: APP_VERSION,
     exportedAt: new Date().toISOString(),
-    names: [...names],
+    names: [...state.names],
     state: {
       mode: state.mode,
       speed: state.speed,
@@ -1440,7 +1436,7 @@ export function importFullBackup(file) {
       if (!data.names || !Array.isArray(data.names)) throw new Error('Invalid backup');
       const err = validateNames(data.names);
       if (err) throw new Error(err);
-      names = data.names.map(n => String(n).trim()).slice(0, MAX_NAMES);
+      state.names = data.names.map(n => String(n).trim()).slice(0, MAX_NAMES);
       const s = data.state || data;
       if (VALID_MODES.includes(s.mode)) state.mode = s.mode;
       if (s.speed) state.speed = s.speed;
@@ -1478,19 +1474,19 @@ export function importFullBackup(file) {
 }
 
 export function startTour() {
-  tourStep = 0;
+  state.tourStep = 0;
   el.tourOverlay.classList.add('show');
   renderTourStep();
 }
 
 export function renderTourStep() {
-  const step = TOUR_STEPS[tourStep];
+  const step = TOUR_STEPS[state.tourStep];
   document.getElementById('tourTitle').textContent = step.title;
   document.getElementById('tourText').textContent = step.text;
   document.getElementById('tourDots').innerHTML = TOUR_STEPS.map((_, i) =>
-    `<span class="tour-dot${i === tourStep ? ' active' : ''}"></span>`
+    `<span class="tour-dot${i === state.tourStep ? ' active' : ''}"></span>`
   ).join('');
-  document.getElementById('tourNext').textContent = tourStep >= TOUR_STEPS.length - 1 ? 'Done' : 'Next';
+  document.getElementById('tourNext').textContent = state.tourStep >= TOUR_STEPS.length - 1 ? 'Done' : 'Next';
 }
 
 export function endTour() {
@@ -1503,7 +1499,7 @@ export function setupInstallBanner() {
   if (state.installBannerDismissed || window.matchMedia('(display-mode: standalone)').matches) return;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
-    deferredInstallPrompt = e;
+    state.deferredInstallPrompt = e;
     el.installBanner.classList.add('show');
   });
 }
@@ -1511,7 +1507,7 @@ export function setupInstallBanner() {
 export function setupServiceWorkerUpdates() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./sw.js').then(reg => {
-    swRegistration = reg;
+    state.swRegistration = reg;
     if (reg.waiting) el.updateBanner.classList.add('show');
     reg.addEventListener('updatefound', () => {
       const nw = reg.installing;
@@ -1529,9 +1525,9 @@ export function setupServiceWorkerUpdates() {
 }
 
 export function applyNames(newNames) {
-  names = newNames;
+  state.names = newNames;
   const nextExcluded = {};
-  names.forEach(n => { nextExcluded[n] = !!state.excluded[n]; });
+  state.names.forEach(n => { nextExcluded[n] = !!state.excluded[n]; });
   state.excluded = nextExcluded;
   initWins(true);
   initFairBag();

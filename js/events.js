@@ -1,8 +1,5 @@
 import { MAX_NAMES, MODE_LABELS, SPEED_LABELS } from './config.js';
-import {
-  state, names, settingsDraft, settingsDraftExcluded, historyShowAll, pendingPinAction,
-  lastSlackText, pinUnlockBuffer, undoSnapshot, deferredInstallPrompt, tourStep, swRegistration, TOUR_STEPS
-} from './state.js';
+import { state, TOUR_STEPS } from './state.js';
 import { el } from './dom.js';
 import * as app from './app-logic.js';
 
@@ -10,9 +7,9 @@ export function bindEvents() {
 el.nameListEl.addEventListener('click', (e) => {
   const btn = e.target.closest('.btn-remove');
   if (!btn || btn.disabled) return;
-  settingsDraft = app.collectDraftNames();
-  settingsDraftExcluded = app.collectDraftExcluded(settingsDraft);
-  settingsDraft.splice(Number(btn.dataset.idx), 1);
+  state.settingsDraft = app.collectDraftNames();
+  state.settingsDraftExcluded = app.collectDraftExcluded(state.settingsDraft);
+  state.settingsDraft.splice(Number(btn.dataset.idx), 1);
   app.renderSettingsList();
   app.scheduleSettingsSave();
 });
@@ -22,13 +19,13 @@ el.nameListEl.addEventListener('input', (e) => {
 });
 
 document.getElementById('addNameBtn').addEventListener('click', () => {
-  settingsDraft = app.collectDraftNames();
-  settingsDraftExcluded = app.collectDraftExcluded(settingsDraft);
-  if (settingsDraft.length >= MAX_NAMES) {
+  state.settingsDraft = app.collectDraftNames();
+  state.settingsDraftExcluded = app.collectDraftExcluded(state.settingsDraft);
+  if (state.settingsDraft.length >= MAX_NAMES) {
     el.settingsError.textContent = `Maximum ${MAX_NAMES} names.`;
     return;
   }
-  settingsDraft.push('');
+  state.settingsDraft.push('');
   el.settingsError.textContent = '';
   app.renderSettingsList();
   const inputs = el.nameListEl.querySelectorAll('.name-row input');
@@ -36,8 +33,8 @@ document.getElementById('addNameBtn').addEventListener('click', () => {
 });
 
 document.getElementById('clearExcludesBtn').addEventListener('click', () => {
-  settingsDraft = app.collectDraftNames();
-  settingsDraftExcluded = {};
+  state.settingsDraft = app.collectDraftNames();
+  state.settingsDraftExcluded = {};
   app.renderSettingsList();
   app.scheduleSettingsSave();
   app.showSettingsToast('All excludes cleared.');
@@ -216,15 +213,15 @@ el.importBackupInput.addEventListener('change', (e) => {
 });
 document.getElementById('clearHistoryBtn').addEventListener('click', app.clearHistory);
 el.showAllHistoryBtn.addEventListener('click', () => {
-  historyShowAll = true;
+  state.historyShowAll = true;
   app.renderHistoryList();
 });
 
 el.historySearch.addEventListener('input', app.renderHistoryList);
-el.historyFilterPerson.addEventListener('change', () => { historyShowAll = false; app.renderHistoryList(); });
-el.historyFilterMode.addEventListener('change', () => { historyShowAll = false; app.renderHistoryList(); });
-el.historyFilterDate.addEventListener('change', () => { historyShowAll = false; app.renderHistoryList(); });
-el.historyFilterTask.addEventListener('change', () => { historyShowAll = false; app.renderHistoryList(); });
+el.historyFilterPerson.addEventListener('change', () => { state.historyShowAll = false; app.renderHistoryList(); });
+el.historyFilterMode.addEventListener('change', () => { state.historyShowAll = false; app.renderHistoryList(); });
+el.historyFilterDate.addEventListener('change', () => { state.historyShowAll = false; app.renderHistoryList(); });
+el.historyFilterTask.addEventListener('change', () => { state.historyShowAll = false; app.renderHistoryList(); });
 
 el.statusTask.addEventListener('click', () => {
   app.openSettings();
@@ -244,7 +241,7 @@ el.modeGroups.addEventListener('click', (e) => {
   const newMode = btn.dataset.mode;
   if (newMode === state.mode) return;
   if (state.pinEnabled && !state.pinUnlocked) {
-    pendingPinAction = () => {
+    state.pendingPinAction = () => {
       state.mode = newMode;
       app.syncModeButtons();
       app.initFairBag();
@@ -269,7 +266,7 @@ document.getElementById('speedButtons').addEventListener('click', (e) => {
   const newSpeed = btn.dataset.speed;
   if (newSpeed === state.speed) return;
   if (state.pinEnabled && !state.pinUnlocked) {
-    pendingPinAction = () => {
+    state.pendingPinAction = () => {
       state.speed = newSpeed;
       app.syncModeSpeedUI();
       app.updateStatusBar();
@@ -289,7 +286,7 @@ document.getElementById('speedButtons').addEventListener('click', (e) => {
 el.spinBtn.addEventListener('click', app.spin);
 document.getElementById('modalCopy').addEventListener('click', app.copyResultText);
 document.getElementById('modalCopySlack').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(lastSlackText); app.showHomeToast('Slack format copied!'); } catch (_) {}
+  try { await navigator.clipboard.writeText(state.lastSlackText); app.showHomeToast('Slack format copied!'); } catch (_) {}
 });
 document.getElementById('modalShare').addEventListener('click', app.shareResult);
 document.getElementById('modalUndo').addEventListener('click', app.undoLastSpin);
@@ -309,10 +306,10 @@ el.pinModal.addEventListener('click', (e) => {
 document.getElementById('pinCancel').addEventListener('click', app.closePinModal);
 
 document.getElementById('pinUnlockInput').addEventListener('input', (e) => {
-  pinUnlockBuffer = e.target.value.replace(/\D/g, '').slice(0, 4);
-  e.target.value = pinUnlockBuffer;
+  state.pinUnlockBuffer = e.target.value.replace(/\D/g, '').slice(0, 4);
+  e.target.value = state.pinUnlockBuffer;
   app.updatePinDots();
-  if (pinUnlockBuffer.length === 4) app.tryPinUnlock(pinUnlockBuffer);
+  if (state.pinUnlockBuffer.length === 4) app.tryPinUnlock(state.pinUnlockBuffer);
 });
 
 document.addEventListener('keydown', (e) => {
@@ -345,14 +342,14 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.getElementById('updateRefreshBtn').addEventListener('click', () => {
-  if (swRegistration?.waiting) swRegistration.waiting.postMessage('skipWaiting');
+  if (state.swRegistration?.waiting) state.swRegistration.waiting.postMessage('skipWaiting');
   window.location.reload();
 });
 document.getElementById('installGoBtn').addEventListener('click', async () => {
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
-  deferredInstallPrompt = null;
+  if (!state.deferredInstallPrompt) return;
+  state.deferredInstallPrompt.prompt();
+  await state.deferredInstallPrompt.userChoice;
+  state.deferredInstallPrompt = null;
   el.installBanner.classList.remove('show');
 });
 document.getElementById('installDismissBtn').addEventListener('click', () => {
@@ -362,8 +359,8 @@ document.getElementById('installDismissBtn').addEventListener('click', () => {
 });
 document.getElementById('tourSkip').addEventListener('click', app.endTour);
 document.getElementById('tourNext').addEventListener('click', () => {
-  if (tourStep >= TOUR_STEPS.length - 1) app.endTour();
-  else { tourStep++; app.renderTourStep(); }
+  if (state.tourStep >= TOUR_STEPS.length - 1) app.endTour();
+  else { state.tourStep++; app.renderTourStep(); }
 });
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {

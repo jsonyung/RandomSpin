@@ -1,9 +1,8 @@
-/** Mutable app state */
+/** Mutable app state — all reassigned fields live on `state` (ES module imports are read-only). */
 import { DEFAULT_NAMES, DEFAULT_PRESETS } from './config.js';
 
-export let names = [...DEFAULT_NAMES];
-
 export const state = {
+  names: [...DEFAULT_NAMES],
   mode: 'fairBag',
   speed: 'normal',
   theme: 'dark',
@@ -30,22 +29,21 @@ export const state = {
   installBannerDismissed: false,
   soundVolume: 0.8,
   requireTaskBeforeSpin: false,
-  pinLockResetCounts: false
+  pinLockResetCounts: false,
+  settingsDraft: [],
+  settingsDraftExcluded: {},
+  historyShowAll: false,
+  pendingPinAction: null,
+  lastResultText: '',
+  lastSlackText: '',
+  pinUnlockBuffer: '',
+  dailyResetTimer: null,
+  undoSnapshot: null,
+  settingsSaveTimer: null,
+  deferredInstallPrompt: null,
+  tourStep: 0,
+  swRegistration: null
 };
-
-export let settingsDraft = [];
-export let settingsDraftExcluded = {};
-export let historyShowAll = false;
-export let pendingPinAction = null;
-export let lastResultText = '';
-export let lastSlackText = '';
-export let pinUnlockBuffer = '';
-export let dailyResetTimer = null;
-export let undoSnapshot = null;
-export let settingsSaveTimer = null;
-export let deferredInstallPrompt = null;
-export let tourStep = 0;
-export let swRegistration = null;
 
 export const TOUR_STEPS = [
   { title: 'Welcome!', text: 'Fair Ads Spinner picks someone fairly when a lead comes in. Let\'s walk through the basics.' },
