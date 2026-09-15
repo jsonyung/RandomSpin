@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fair Ads Spinner</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ads Spinner">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -73,10 +78,16 @@
 
     .header-row {
       display: grid;
-      grid-template-columns: 38px 1fr 76px;
+      grid-template-columns: 38px 1fr 114px;
       align-items: center;
       gap: 0.5rem;
       margin-bottom: 0.25rem;
+    }
+
+    .lock-btn {
+      color: #fbbf24;
+      border-color: rgba(251, 191, 36, 0.35);
+      background: rgba(251, 191, 36, 0.1);
     }
 
     .header-row h1 {
@@ -142,6 +153,14 @@
       color: var(--accent);
       border-color: rgba(99, 102, 241, 0.35);
       background: rgba(99, 102, 241, 0.1);
+    }
+
+    .status-pill.task-pill {
+      color: var(--text);
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .field-group { margin-bottom: 1.25rem; }
@@ -288,8 +307,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 72px;
-      height: 72px;
+      width: 84px;
+      height: 84px;
       border-radius: 50%;
       border: 3px solid rgba(255, 255, 255, 0.3);
       background: linear-gradient(145deg, var(--accent), #4338ca);
@@ -726,23 +745,245 @@
       color: var(--accent);
       margin-bottom: 0.65rem;
     }
+
+    select, input[type="time"], input[type="password"], input[type="search"] {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input[type="time"]:focus, input[type="password"]:focus, input[type="search"]:focus {
+      border-color: var(--accent);
+    }
+
+    .preset-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.65rem;
+    }
+
+    .preset-chip {
+      padding: 0.4rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--btn-bg);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    .preset-manage {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+    }
+
+    .preset-manage input { flex: 1; }
+
+    .preset-manage button {
+      padding: 0.55rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--btn-bg);
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .preset-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
+    }
+
+    .preset-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+    }
+
+    .preset-tag button {
+      border: none;
+      background: none;
+      color: #f87171;
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .name-row-wrap {
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--input-bg);
+    }
+
+    .exclude-label {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.45rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      cursor: pointer;
+    }
+
+    .exclude-label input { width: auto; accent-color: var(--accent); }
+
+    .export-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .export-row button {
+      width: 100%;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--btn-bg);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .export-row button:hover { border-color: var(--accent); color: var(--accent); }
+
+    .pin-setup { display: flex; gap: 0.5rem; margin-top: 0.65rem; }
+    .pin-setup input { flex: 1; letter-spacing: 0.3em; text-align: center; }
+    .pin-setup button {
+      padding: 0.55rem 0.85rem;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .pin-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .pin-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      transition: all 0.15s;
+    }
+
+    .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+
+    .history-filters {
+      display: grid;
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    .filter-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      max-height: 55vh;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+    }
+
+    .history-item {
+      padding: 0.65rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      font-size: 0.8rem;
+    }
+
+    .history-item strong { color: var(--text); }
+    .history-meta { color: var(--muted); font-size: 0.72rem; margin-top: 0.25rem; }
+
+    .history-empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 2rem 1rem;
+    }
+
+    .show-all-btn {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 10px;
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+
+    #confetti {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body data-theme="dark">
+  <canvas id="confetti" aria-hidden="true"></canvas>
   <div class="app">
     <div class="header-row">
-      <div aria-hidden="true"></div>
+      <button type="button" class="icon-btn lock-btn" id="lockBtn" title="PIN locked" aria-label="PIN locked" style="display:none">🔒</button>
+      <div id="headerSpacer" aria-hidden="true"></div>
       <h1>Fair Ads Spinner</h1>
       <div class="header-actions">
         <button type="button" class="icon-btn" id="helpBtn" title="How it works" aria-label="Open help guide">?</button>
+        <button type="button" class="icon-btn" id="historyBtn" title="Spin history" aria-label="Open history">🕐</button>
         <button type="button" class="icon-btn" id="settingsBtn" title="Settings" aria-label="Open settings">⚙</button>
       </div>
     </div>
-    <p class="subtitle">Let the wheel decide — no arguments</p>
+    <p class="subtitle" id="homeSubtitle">Press Space to spin</p>
 
     <div class="status-bar" id="statusBar">
       <span class="status-pill accent" id="statusMode">Fair Bag</span>
       <span class="status-pill" id="statusSpeed">Normal</span>
+      <span class="status-pill task-pill" id="statusTask" style="display:none"></span>
       <span class="status-pill" id="statusRound"></span>
     </div>
 
@@ -764,6 +1005,7 @@
       <p class="modal-winner" id="modalWinner"></p>
       <p class="modal-message" id="modalMessage"></p>
       <div class="modal-actions">
+        <button type="button" class="btn-close" id="modalCopy">Copy Result</button>
         <button type="button" class="btn-close" id="modalClose">Close</button>
         <button type="button" class="btn-primary" id="modalAgain">Spin Again</button>
       </div>
@@ -782,16 +1024,27 @@
         <label for="taskInputSettings">Enter Task / Reason to Call</label>
         <input type="text" id="taskInputSettings" placeholder="e.g. Facebook lead, callback request…" autocomplete="off">
         <p class="field-hint">Shows in the result popup so everyone knows why that person was picked. Set it here before you spin.</p>
+        <p class="field-hint" style="margin-top:0.65rem">Quick presets — tap to set task:</p>
+        <div class="preset-list" id="presetList"></div>
+        <div class="preset-manage">
+          <input type="text" id="newPresetInput" placeholder="Add preset…" maxlength="40" autocomplete="off">
+          <button type="button" id="addPresetBtn">Add</button>
+        </div>
+        <div class="preset-tags" id="presetTags"></div>
       </div>
 
       <div class="settings-section">
         <p class="section-label">Assignment</p>
-        <label>Assignment Mode</label>
-        <div class="segmented" id="modeButtons">
-          <button type="button" data-mode="fairBag" class="active">Fair Bag</button>
-          <button type="button" data-mode="pureRandom">Pure Random</button>
-          <button type="button" data-mode="weighted">Weighted</button>
-        </div>
+        <label for="modeSelect">Assignment Mode</label>
+        <select id="modeSelect">
+          <option value="fairBag">Fair Bag — equal share, surprise order</option>
+          <option value="pureRandom">Pure Random — fresh coin flip every spin</option>
+          <option value="weighted">Weighted — catch-up for whoever is behind</option>
+          <option value="antiRepeat">Anti-Repeat — cannot win twice in a row</option>
+          <option value="lastExcluded">Last Excluded — previous winner skipped next spin</option>
+          <option value="lowestFirst">Lowest First — random among lowest session count</option>
+          <option value="strictBalance">Strict Balance — always picks minimum wins</option>
+        </select>
         <p class="mode-hint" id="modeHint"></p>
         <button type="button" class="help-link" id="helpLinkModes">Read full guide →</button>
       </div>
@@ -824,12 +1077,68 @@
           </label>
         </div>
         <div class="setting-row">
+          <label for="confettiToggle">Confetti on win</label>
+          <label class="toggle">
+            <input type="checkbox" id="confettiToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <label for="quickResultToggle">Quick result (auto-close 2s)</label>
+          <label class="toggle">
+            <input type="checkbox" id="quickResultToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
           <label>Theme</label>
           <div class="segmented" id="themeButtons" style="flex:1;max-width:180px">
             <button type="button" data-theme="dark" class="active">Dark</button>
             <button type="button" data-theme="light">Light</button>
           </div>
         </div>
+      </div>
+
+      <div class="settings-section">
+        <p class="section-label">Daily Reset</p>
+        <div class="setting-row" style="border-top:none;margin-top:0;padding-top:0">
+          <label for="dailyResetToggle">Auto-reset counts daily</label>
+          <label class="toggle">
+            <input type="checkbox" id="dailyResetToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <label for="dailyResetTime" style="margin-top:0.75rem">Reset time (shift start)</label>
+        <input type="time" id="dailyResetTime" value="09:00">
+        <p class="field-hint">Counts reset at this time each day. Set to 00:00 for midnight.</p>
+      </div>
+
+      <div class="settings-section">
+        <p class="section-label">PIN Lock</p>
+        <div class="setting-row" style="border-top:none;margin-top:0;padding-top:0">
+          <label for="pinToggle">Require PIN for mode/speed changes</label>
+          <label class="toggle">
+            <input type="checkbox" id="pinToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <label for="pinInput" style="margin-top:0.75rem">Set 4-digit PIN</label>
+        <div class="pin-setup">
+          <input type="password" id="pinInput" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" autocomplete="off">
+          <button type="button" id="savePinBtn">Save PIN</button>
+        </div>
+        <p class="field-hint">PIN is stored locally as a simple hash. Unlock once per session to change fairness settings.</p>
+      </div>
+
+      <div class="settings-section">
+        <p class="section-label">Export</p>
+        <div class="export-row">
+          <button type="button" id="copyTeamLinkBtn">Copy Team Link</button>
+          <button type="button" id="exportHistoryBtn">Export History CSV</button>
+          <button type="button" id="exportTallyBtn">Export Tally CSV</button>
+          <button type="button" id="copySummaryBtn">Copy Summary Text</button>
+        </div>
+        <p class="field-hint">Team link shares names, mode, speed & task via URL — send to teammates to open the same setup.</p>
       </div>
 
       <p class="settings-error" id="settingsError"></p>
@@ -886,6 +1195,29 @@
       </div>
 
       <div class="help-section">
+        <span class="help-tag">Extra modes</span>
+        <h3>More fairness options</h3>
+        <ul>
+          <li><strong style="color:var(--text)">Anti-Repeat</strong> — same person cannot win twice in a row.</li>
+          <li><strong style="color:var(--text)">Last Excluded</strong> — previous winner is skipped on the next spin.</li>
+          <li><strong style="color:var(--text)">Lowest First</strong> — random pick among people tied for fewest wins.</li>
+          <li><strong style="color:var(--text)">Strict Balance</strong> — always picks someone with the minimum win count (random if tied).</li>
+        </ul>
+        <p>Use the mode dropdown in Settings. You can also temporarily exclude someone from spins in Team settings.</p>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">History & export</span>
+        <h3>History, presets & export</h3>
+        <ul>
+          <li>Tap 🕐 on the home screen for spin history (filter, search, export).</li>
+          <li>Task presets in Settings — tap to set the task quickly.</li>
+          <li>Export History or Tally as CSV, or copy a text summary.</li>
+          <li>Press <strong style="color:var(--text)">Space</strong> to spin when not typing.</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
         <span class="help-tag">Speed</span>
         <h3>Spin Speed</h3>
         <ul>
@@ -908,13 +1240,73 @@
     </div>
   </div>
 
+  <div class="settings-page" id="historyPage" aria-hidden="true">
+    <div class="settings-inner">
+      <div class="settings-top">
+        <button type="button" class="back-btn" id="historyBack">← Back</button>
+        <h2>Spin History</h2>
+      </div>
+
+      <div class="history-filters">
+        <input type="search" id="historySearch" placeholder="Search winner or task…" autocomplete="off">
+        <div class="filter-row">
+          <select id="historyFilterPerson">
+            <option value="">All people</option>
+          </select>
+          <select id="historyFilterMode">
+            <option value="">All modes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="history-list" id="historyList"></div>
+      <button type="button" class="show-all-btn" id="showAllHistoryBtn" style="display:none">Show all history</button>
+
+      <div class="modal-actions" style="justify-content:stretch">
+        <button type="button" class="btn-danger" id="clearHistoryBtn">Clear History</button>
+        <button type="button" class="btn-primary" id="exportHistoryBtn2" style="flex:1">Export CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="pinModal" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
+    <div class="modal">
+      <div class="modal-icon">🔒</div>
+      <p class="modal-title" id="pinModalTitle">Enter PIN</p>
+      <p class="modal-sub">Unlock to change assignment mode or spin speed.</p>
+      <div class="pin-dots" id="pinDots">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+      <input type="password" id="pinUnlockInput" maxlength="4" pattern="[0-9]*" inputmode="numeric" autocomplete="off" style="position:absolute;opacity:0;pointer-events:none" aria-hidden="true">
+      <p class="settings-error" id="pinError"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-close" id="pinCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = 'fairAdsSpinner_v3';
-    const MODE_LABELS = { fairBag: 'Fair Bag', pureRandom: 'Pure Random', weighted: 'Weighted' };
+    const STORAGE_KEY = 'fairAdsSpinner_v4';
+    const VALID_MODES = ['fairBag', 'pureRandom', 'weighted', 'antiRepeat', 'lastExcluded', 'lowestFirst', 'strictBalance'];
+    const MODE_LABELS = {
+      fairBag: 'Fair Bag',
+      pureRandom: 'Pure Random',
+      weighted: 'Weighted',
+      antiRepeat: 'Anti-Repeat',
+      lastExcluded: 'Last Excluded',
+      lowestFirst: 'Lowest First',
+      strictBalance: 'Strict Balance'
+    };
     const SPEED_LABELS = { quick: 'Quick', normal: 'Normal', dramatic: 'Dramatic' };
     const DEFAULT_NAMES = ['Peter', 'Simon', 'Shaun', 'Danny'];
+    const DEFAULT_PRESETS = ['Facebook lead', 'Callback', 'Walk-in', 'Instagram DM'];
     const MAX_NAMES = 12;
     const MIN_NAMES = 2;
+    const MAX_HISTORY = 500;
+    const HISTORY_DEFAULT_SHOW = 50;
     const SEG_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16', '#e879f9', '#fb7185'];
 
     const SPEED_CONFIG = {
@@ -930,13 +1322,33 @@
       speed: 'normal',
       theme: 'dark',
       soundEnabled: true,
+      confettiEnabled: true,
+      quickResult: false,
       currentRotation: 0,
       isSpinning: false,
       wins: {},
+      excluded: {},
       fairBagDeck: [],
       fairBagRound: 1,
-      fairBagSpinInRound: 0
+      fairBagSpinInRound: 0,
+      lastWinner: null,
+      history: [],
+      taskPresets: [...DEFAULT_PRESETS],
+      pinEnabled: false,
+      pinHash: null,
+      pinUnlocked: false,
+      dailyResetEnabled: false,
+      dailyResetTime: '09:00',
+      lastDailyReset: null
     };
+
+    let settingsDraft = [];
+    let settingsDraftExcluded = {};
+    let historyShowAll = false;
+    let pendingPinAction = null;
+    let lastResultText = '';
+    let pinUnlockBuffer = '';
+    let dailyResetTimer = null;
 
     const wheelRotator = document.getElementById('wheelRotator');
     const wheelSvg = document.getElementById('wheelSvg');
@@ -955,6 +1367,23 @@
     const settingsError = document.getElementById('settingsError');
     const helpModal = document.getElementById('helpModal');
     const soundToggle = document.getElementById('soundToggle');
+    const confettiToggle = document.getElementById('confettiToggle');
+    const quickResultToggle = document.getElementById('quickResultToggle');
+    const modeSelect = document.getElementById('modeSelect');
+    const statusTask = document.getElementById('statusTask');
+    const historyPage = document.getElementById('historyPage');
+    const historyList = document.getElementById('historyList');
+    const historySearch = document.getElementById('historySearch');
+    const historyFilterPerson = document.getElementById('historyFilterPerson');
+    const historyFilterMode = document.getElementById('historyFilterMode');
+    const presetList = document.getElementById('presetList');
+    const presetTags = document.getElementById('presetTags');
+    const pinModal = document.getElementById('pinModal');
+    const pinToggle = document.getElementById('pinToggle');
+    const dailyResetToggle = document.getElementById('dailyResetToggle');
+    const dailyResetTime = document.getElementById('dailyResetTime');
+    const lockBtn = document.getElementById('lockBtn');
+    const headerSpacer = document.getElementById('headerSpacer');
 
     const SpinAudio = {
       ctx: null,
@@ -1053,6 +1482,144 @@
       }
     };
 
+    const Confetti = {
+      canvas: null,
+      ctx: null,
+      particles: [],
+      raf: null,
+
+      init() {
+        this.canvas = document.getElementById('confetti');
+        if (!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      },
+
+      resize() {
+        if (!this.canvas) return;
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      },
+
+      burst() {
+        if (!state.confettiEnabled || !this.ctx) return;
+        const colors = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#ec4899', '#6366f1'];
+        this.particles = [];
+        for (let i = 0; i < 120; i++) {
+          this.particles.push({
+            x: window.innerWidth / 2,
+            y: window.innerHeight * 0.35,
+            vx: (Math.random() - 0.5) * 14,
+            vy: Math.random() * -12 - 4,
+            w: Math.random() * 8 + 4,
+            h: Math.random() * 6 + 3,
+            color: colors[i % colors.length],
+            rot: Math.random() * 360,
+            vr: (Math.random() - 0.5) * 12,
+            life: 1
+          });
+        }
+        if (this.raf) cancelAnimationFrame(this.raf);
+        this.animate();
+      },
+
+      animate() {
+        if (!this.ctx) return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        let alive = 0;
+        this.particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.25;
+          p.rot += p.vr;
+          p.life -= 0.012;
+          if (p.life <= 0) return;
+          alive++;
+          this.ctx.save();
+          this.ctx.translate(p.x, p.y);
+          this.ctx.rotate(p.rot * Math.PI / 180);
+          this.ctx.globalAlpha = Math.max(0, p.life);
+          this.ctx.fillStyle = p.color;
+          this.ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          this.ctx.restore();
+        });
+        if (alive > 0) {
+          this.raf = requestAnimationFrame(() => this.animate());
+        } else {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+      }
+    };
+
+    function hashPin(pin) {
+      return btoa(String(pin));
+    }
+
+    function verifyPin(pin) {
+      return state.pinHash && hashPin(pin) === state.pinHash;
+    }
+
+    function updateLockUI() {
+      const showLock = state.pinEnabled && !state.pinUnlocked;
+      lockBtn.style.display = showLock ? '' : 'none';
+      headerSpacer.style.display = showLock ? 'none' : '';
+    }
+
+    function requirePinUnlock(action) {
+      if (!state.pinEnabled || state.pinUnlocked) {
+        action();
+        return;
+      }
+      pendingPinAction = action;
+      openPinModal();
+    }
+
+    function openPinModal() {
+      pinUnlockBuffer = '';
+      document.getElementById('pinError').textContent = '';
+      updatePinDots();
+      pinModal.classList.add('show');
+      document.getElementById('pinUnlockInput').focus();
+    }
+
+    function closePinModal() {
+      pinModal.classList.remove('show');
+      pinUnlockBuffer = '';
+      updatePinDots();
+      pendingPinAction = null;
+    }
+
+    function updatePinDots() {
+      document.querySelectorAll('#pinDots .pin-dot').forEach((dot, i) => {
+        dot.classList.toggle('filled', i < pinUnlockBuffer.length);
+      });
+    }
+
+    function tryPinUnlock(digits) {
+      if (verifyPin(digits)) {
+        state.pinUnlocked = true;
+        updateLockUI();
+        closePinModal();
+        if (pendingPinAction) {
+          const fn = pendingPinAction;
+          pendingPinAction = null;
+          fn();
+        }
+      } else {
+        document.getElementById('pinError').textContent = 'Incorrect PIN. Try again.';
+        pinUnlockBuffer = '';
+        updatePinDots();
+      }
+    }
+
+    function handlePinKey(digit) {
+      if (pinUnlockBuffer.length >= 4) return;
+      pinUnlockBuffer += digit;
+      updatePinDots();
+      if (pinUnlockBuffer.length === 4) tryPinUnlock(pinUnlockBuffer);
+    }
+
     function applyTheme(theme) {
       state.theme = theme;
       document.body.setAttribute('data-theme', theme);
@@ -1072,12 +1639,16 @@
     }
 
     function modeHintText() {
-      const n = names.length;
-      const pct = Math.round(100 / n);
+      const n = getEligibleNames().length || names.length;
+      const pct = Math.round(100 / Math.max(n, 1));
       return {
         fairBag: `Shuffled deck — everyone gets exactly 1 per round of ${n}.`,
         pureRandom: `Fresh ${pct}% chance every spin — repeats allowed.`,
-        weighted: 'Catch-up mode — fewer wins means higher chance next spin.'
+        weighted: 'Catch-up mode — fewer wins means higher chance next spin.',
+        antiRepeat: 'Same person cannot win twice in a row.',
+        lastExcluded: 'Previous winner is excluded on the next spin.',
+        lowestFirst: 'Random pick among people tied for fewest session wins.',
+        strictBalance: 'Always picks someone with the minimum win count.'
       }[state.mode];
     }
 
@@ -1093,15 +1664,33 @@
       state.wins = next;
     }
 
+    function getEligibleNames() {
+      return names.filter(n => !state.excluded[n]);
+    }
+
     function savePrefs() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
           names: [...names],
           theme: state.theme,
           soundEnabled: state.soundEnabled,
+          confettiEnabled: state.confettiEnabled,
+          quickResult: state.quickResult,
           mode: state.mode,
           speed: state.speed,
-          task: taskInputSettings.value
+          task: taskInputSettings.value,
+          wins: state.wins,
+          excluded: state.excluded,
+          history: state.history,
+          taskPresets: state.taskPresets,
+          pinEnabled: state.pinEnabled,
+          pinHash: state.pinHash,
+          dailyResetEnabled: state.dailyResetEnabled,
+          dailyResetTime: state.dailyResetTime,
+          lastDailyReset: state.lastDailyReset,
+          fairBagRound: state.fairBagRound,
+          fairBagSpinInRound: state.fairBagSpinInRound,
+          lastWinner: state.lastWinner
         }));
       } catch (_) { /* ignore */ }
     }
@@ -1113,6 +1702,7 @@
     function loadFromStorage() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY)
+          || localStorage.getItem('fairAdsSpinner_v3')
           || localStorage.getItem('fairAdsSpinner_v2')
           || localStorage.getItem('fairAdsSpinner_v1');
         if (!raw) return;
@@ -1122,11 +1712,40 @@
         }
         if (data.theme === 'light' || data.theme === 'dark') state.theme = data.theme;
         if (typeof data.soundEnabled === 'boolean') state.soundEnabled = data.soundEnabled;
-        if (data.mode === 'fairBag' || data.mode === 'pureRandom' || data.mode === 'weighted') state.mode = data.mode;
+        if (typeof data.confettiEnabled === 'boolean') state.confettiEnabled = data.confettiEnabled;
+        if (typeof data.quickResult === 'boolean') state.quickResult = data.quickResult;
+        if (VALID_MODES.includes(data.mode)) state.mode = data.mode;
         if (data.speed === 'quick' || data.speed === 'normal' || data.speed === 'dramatic') state.speed = data.speed;
         if (typeof data.task === 'string') taskInputSettings.value = data.task;
+        if (data.wins && typeof data.wins === 'object') state.wins = data.wins;
+        if (data.excluded && typeof data.excluded === 'object') state.excluded = data.excluded;
+        if (Array.isArray(data.history)) state.history = data.history.slice(0, MAX_HISTORY);
+        if (Array.isArray(data.taskPresets) && data.taskPresets.length) state.taskPresets = data.taskPresets;
+        if (typeof data.pinEnabled === 'boolean') state.pinEnabled = data.pinEnabled;
+        if (typeof data.pinHash === 'string') state.pinHash = data.pinHash;
+        if (typeof data.dailyResetEnabled === 'boolean') state.dailyResetEnabled = data.dailyResetEnabled;
+        if (typeof data.dailyResetTime === 'string') state.dailyResetTime = data.dailyResetTime;
+        if (data.lastDailyReset) state.lastDailyReset = data.lastDailyReset;
+        if (typeof data.fairBagRound === 'number') state.fairBagRound = data.fairBagRound;
+        if (typeof data.fairBagSpinInRound === 'number') state.fairBagSpinInRound = data.fairBagSpinInRound;
+        if (typeof data.lastWinner === 'string') state.lastWinner = data.lastWinner;
       } catch (_) { /* ignore */ }
       if (names.length < MIN_NAMES) names = [...DEFAULT_NAMES];
+      if (!state.taskPresets.length) state.taskPresets = [...DEFAULT_PRESETS];
+    }
+
+    function applyUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('names')) {
+        const parsed = params.get('names').split(',').map(s => s.trim()).filter(Boolean);
+        if (parsed.length >= MIN_NAMES) names = parsed.slice(0, MAX_NAMES);
+      }
+      const mode = params.get('mode');
+      if (mode && VALID_MODES.includes(mode)) state.mode = mode;
+      const speed = params.get('speed');
+      if (speed === 'quick' || speed === 'normal' || speed === 'dramatic') state.speed = speed;
+      const task = params.get('task');
+      if (task) taskInputSettings.value = task;
     }
 
     function fisherYates(arr) {
@@ -1139,13 +1758,15 @@
     }
 
     function initFairBag() {
-      state.fairBagDeck = fisherYates(names);
+      state.fairBagDeck = fisherYates(getEligibleNames());
+      if (state.fairBagDeck.length === 0) state.fairBagDeck = fisherYates(names);
       state.fairBagRound = 1;
       state.fairBagSpinInRound = 0;
     }
 
     function refillFairBagDeck() {
-      state.fairBagDeck = fisherYates(names);
+      state.fairBagDeck = fisherYates(getEligibleNames());
+      if (state.fairBagDeck.length === 0) state.fairBagDeck = fisherYates(names);
       state.fairBagSpinInRound = 0;
       state.fairBagRound++;
     }
@@ -1156,19 +1777,58 @@
       return state.fairBagDeck.shift();
     }
 
+    function pickFromPool(pool) {
+      if (!pool.length) pool = [...names];
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
     function pickPureRandom() {
-      return names[Math.floor(Math.random() * names.length)];
+      const pool = getEligibleNames();
+      return pickFromPool(pool.length ? pool : names);
     }
 
     function pickWeighted() {
-      const weights = names.map(n => 1 / (state.wins[n] + 1));
+      const pool = getEligibleNames().length ? getEligibleNames() : names;
+      const weights = pool.map(n => 1 / (state.wins[n] + 1));
       const total = weights.reduce((s, w) => s + w, 0);
       let r = Math.random() * total;
-      for (let i = 0; i < names.length; i++) {
+      for (let i = 0; i < pool.length; i++) {
         r -= weights[i];
-        if (r <= 0) return names[i];
+        if (r <= 0) return pool[i];
       }
-      return names[names.length - 1];
+      return pool[pool.length - 1];
+    }
+
+    function pickAntiRepeat() {
+      let pool = getEligibleNames().length ? getEligibleNames() : [...names];
+      if (state.lastWinner && pool.length > 1) {
+        pool = pool.filter(n => n !== state.lastWinner);
+        if (!pool.length) pool = getEligibleNames().length ? getEligibleNames() : [...names];
+      }
+      return pickFromPool(pool);
+    }
+
+    function pickLastExcluded() {
+      let pool = getEligibleNames().length ? getEligibleNames() : [...names];
+      if (state.lastWinner && pool.length > 1) {
+        pool = pool.filter(n => n !== state.lastWinner);
+        if (!pool.length) pool = names.filter(n => n !== state.lastWinner);
+      }
+      return pickFromPool(pool.length ? pool : names);
+    }
+
+    function pickLowestFirst() {
+      const pool = getEligibleNames().length ? getEligibleNames() : names;
+      const minWins = Math.min(...pool.map(n => state.wins[n] ?? 0));
+      const tied = pool.filter(n => (state.wins[n] ?? 0) === minWins);
+      return pickFromPool(tied);
+    }
+
+    function pickStrictBalance() {
+      const pool = getEligibleNames().length ? getEligibleNames() : names;
+      const minWins = Math.min(...pool.map(n => state.wins[n] ?? 0));
+      const tied = pool.filter(n => (state.wins[n] ?? 0) === minWins);
+      return pickFromPool(tied);
     }
 
     function pickWinner() {
@@ -1176,8 +1836,26 @@
         case 'fairBag': return pickFairBag();
         case 'pureRandom': return pickPureRandom();
         case 'weighted': return pickWeighted();
+        case 'antiRepeat': return pickAntiRepeat();
+        case 'lastExcluded': return pickLastExcluded();
+        case 'lowestFirst': return pickLowestFirst();
+        case 'strictBalance': return pickStrictBalance();
         default: return pickPureRandom();
       }
+    }
+
+    function addHistoryEntry(winner, task) {
+      const entry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        winner,
+        task: task.trim(),
+        mode: state.mode,
+        speed: state.speed,
+        timestamp: Date.now()
+      };
+      state.history.unshift(entry);
+      if (state.history.length > MAX_HISTORY) state.history.length = MAX_HISTORY;
+      savePrefs();
     }
 
     function segmentSize() {
@@ -1251,9 +1929,7 @@
     }
 
     function syncModeSpeedUI() {
-      document.querySelectorAll('#modeButtons button').forEach(b => {
-        b.classList.toggle('active', b.dataset.mode === state.mode);
-      });
+      modeSelect.value = state.mode;
       document.querySelectorAll('#speedButtons button').forEach(b => {
         b.classList.toggle('active', b.dataset.speed === state.speed);
       });
@@ -1261,11 +1937,20 @@
     }
 
     function updateStatusBar() {
-      statusMode.textContent = MODE_LABELS[state.mode];
+      statusMode.textContent = MODE_LABELS[state.mode] || state.mode;
       statusSpeed.textContent = SPEED_LABELS[state.speed];
+      const task = taskInputSettings.value.trim();
+      if (task) {
+        statusTask.textContent = task;
+        statusTask.title = task;
+        statusTask.style.display = '';
+      } else {
+        statusTask.style.display = 'none';
+      }
       if (state.mode === 'fairBag') {
+        const eligible = getEligibleNames().length || names.length;
         const spin = state.fairBagSpinInRound === 0 ? 1 : state.fairBagSpinInRound;
-        statusRound.textContent = `Round ${state.fairBagRound} · ${spin}/${names.length}`;
+        statusRound.textContent = `Round ${state.fairBagRound} · ${spin}/${eligible}`;
         statusRound.style.display = '';
       } else {
         statusRound.style.display = 'none';
@@ -1276,16 +1961,25 @@
       spinBtn.disabled = disabled;
       document.getElementById('settingsBtn').disabled = disabled;
       document.getElementById('helpBtn').disabled = disabled;
-      document.querySelectorAll('#modeButtons button, #speedButtons button').forEach(btn => {
+      document.getElementById('historyBtn').disabled = disabled;
+      document.querySelectorAll('#speedButtons button').forEach(btn => {
         btn.disabled = disabled;
       });
+      modeSelect.disabled = disabled;
     }
 
     function showResultModal(winner, task) {
       const taskLabel = task.trim() || 'this lead';
+      lastResultText = `${winner} has been chosen for ${taskLabel}!`;
       modalWinner.textContent = winner;
-      modalMessage.textContent = `${winner} has been chosen for ${taskLabel}!`;
+      modalMessage.textContent = lastResultText;
       resultModal.classList.add('show');
+      Confetti.burst();
+      if (state.quickResult) {
+        setTimeout(() => {
+          if (resultModal.classList.contains('show')) hideResultModal();
+        }, 2000);
+      }
     }
 
     function hideResultModal() {
@@ -1323,6 +2017,8 @@
         SpinAudio.playWin();
 
         state.wins[winner]++;
+        state.lastWinner = winner;
+        addHistoryEntry(winner, taskInputSettings.value);
         renderTally();
         updateStatusBar();
         showResultModal(winner, taskInputSettings.value);
@@ -1337,26 +2033,244 @@
     function renderSettingsList() {
       nameListEl.innerHTML = '';
       settingsDraft.forEach((name, idx) => {
-        const row = document.createElement('div');
-        row.className = 'name-row';
-        row.innerHTML = `
-          <input type="text" value="${escapeHtml(name)}" data-idx="${idx}" maxlength="24" aria-label="Person name">
-          <button type="button" class="btn-remove" data-idx="${idx}" title="Remove" ${settingsDraft.length <= MIN_NAMES ? 'disabled' : ''}>×</button>
+        const wrap = document.createElement('div');
+        wrap.className = 'name-row-wrap';
+        const excluded = !!settingsDraftExcluded[name];
+        wrap.innerHTML = `
+          <div class="name-row">
+            <input type="text" value="${escapeHtml(name)}" data-idx="${idx}" maxlength="24" aria-label="Person name">
+            <button type="button" class="btn-remove" data-idx="${idx}" title="Remove" ${settingsDraft.length <= MIN_NAMES ? 'disabled' : ''}>×</button>
+          </div>
+          <label class="exclude-label">
+            <input type="checkbox" class="exclude-cb" data-name="${escapeHtml(name)}" ${excluded ? 'checked' : ''}>
+            Exclude from next spins
+          </label>
         `;
-        nameListEl.appendChild(row);
+        nameListEl.appendChild(wrap);
       });
     }
 
-    let settingsDraft = [];
+    function renderPresets() {
+      presetList.innerHTML = state.taskPresets.map(p => `
+        <button type="button" class="preset-chip" data-preset="${escapeHtml(p)}">${escapeHtml(p)}</button>
+      `).join('');
+      presetTags.innerHTML = state.taskPresets.map((p, i) => `
+        <span class="preset-tag">${escapeHtml(p)}<button type="button" data-remove-preset="${i}" title="Remove">×</button></span>
+      `).join('');
+    }
+
+    function syncSettingsToggles() {
+      soundToggle.checked = state.soundEnabled;
+      confettiToggle.checked = state.confettiEnabled;
+      quickResultToggle.checked = state.quickResult;
+      pinToggle.checked = state.pinEnabled;
+      dailyResetToggle.checked = state.dailyResetEnabled;
+      dailyResetTime.value = state.dailyResetTime || '09:00';
+    }
+
+    function getFilteredHistory() {
+      const q = historySearch.value.trim().toLowerCase();
+      const person = historyFilterPerson.value;
+      const mode = historyFilterMode.value;
+      return state.history.filter(entry => {
+        if (person && entry.winner !== person) return false;
+        if (mode && entry.mode !== mode) return false;
+        if (q) {
+          const hay = `${entry.winner} ${entry.task} ${MODE_LABELS[entry.mode] || entry.mode}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderHistoryFilters() {
+      const people = [...new Set(state.history.map(h => h.winner))].sort();
+      historyFilterPerson.innerHTML = '<option value="">All people</option>' +
+        people.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+      historyFilterMode.innerHTML = '<option value="">All modes</option>' +
+        VALID_MODES.map(m => `<option value="${m}">${escapeHtml(MODE_LABELS[m])}</option>`).join('');
+    }
+
+    function renderHistoryList() {
+      const filtered = getFilteredHistory();
+      const limit = historyShowAll ? filtered.length : HISTORY_DEFAULT_SHOW;
+      const shown = filtered.slice(0, limit);
+      const showAllBtn = document.getElementById('showAllHistoryBtn');
+
+      if (!filtered.length) {
+        historyList.innerHTML = '<p class="history-empty">No spins recorded yet.</p>';
+        showAllBtn.style.display = 'none';
+        return;
+      }
+
+      historyList.innerHTML = shown.map(entry => {
+        const dt = new Date(entry.timestamp);
+        const when = dt.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const task = entry.task || 'this lead';
+        return `
+          <div class="history-item">
+            <strong>${escapeHtml(entry.winner)}</strong> — ${escapeHtml(task)}
+            <div class="history-meta">${escapeHtml(MODE_LABELS[entry.mode] || entry.mode)} · ${escapeHtml(SPEED_LABELS[entry.speed] || entry.speed)} · ${when}</div>
+          </div>
+        `;
+      }).join('');
+
+      if (filtered.length > HISTORY_DEFAULT_SHOW && !historyShowAll) {
+        showAllBtn.style.display = '';
+        showAllBtn.textContent = `Show all (${filtered.length})`;
+      } else {
+        showAllBtn.style.display = 'none';
+      }
+    }
+
+    function openHistory() {
+      if (state.isSpinning) return;
+      historyShowAll = false;
+      historySearch.value = '';
+      historyFilterPerson.value = '';
+      historyFilterMode.value = '';
+      renderHistoryFilters();
+      renderHistoryList();
+      historyPage.classList.add('open');
+      historyPage.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeHistory() {
+      historyPage.classList.remove('open');
+      historyPage.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function clearHistory() {
+      if (!state.history.length) return;
+      if (!confirm('Clear all spin history? This cannot be undone.')) return;
+      state.history = [];
+      savePrefs();
+      renderHistoryList();
+    }
+
+    function downloadCSV(filename, rows) {
+      const csv = rows.map(row => row.map(cell => {
+        const s = String(cell ?? '');
+        return `"${s.replace(/"/g, '""')}"`;
+      }).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportHistoryCSV() {
+      const rows = [['ID', 'Winner', 'Task', 'Mode', 'Speed', 'Timestamp']];
+      state.history.forEach(e => {
+        rows.push([e.id, e.winner, e.task, MODE_LABELS[e.mode] || e.mode, SPEED_LABELS[e.speed] || e.speed, new Date(e.timestamp).toISOString()]);
+      });
+      downloadCSV('fair-ads-history.csv', rows);
+    }
+
+    function exportTallyCSV() {
+      const rows = [['Name', 'Wins', 'Excluded']];
+      names.forEach(n => rows.push([n, state.wins[n] ?? 0, state.excluded[n] ? 'Yes' : 'No']));
+      downloadCSV('fair-ads-tally.csv', rows);
+    }
+
+    function buildSummaryText() {
+      const lines = ['Fair Ads Spinner — Session Summary', ''];
+      lines.push(`Mode: ${MODE_LABELS[state.mode]} · Speed: ${SPEED_LABELS[state.speed]}`);
+      const task = taskInputSettings.value.trim();
+      if (task) lines.push(`Current task: ${task}`);
+      lines.push('', 'Tally:');
+      names.forEach(n => lines.push(`  ${n}: ${state.wins[n] ?? 0}${state.excluded[n] ? ' (excluded)' : ''}`));
+      if (state.history.length) {
+        lines.push('', `Recent spins (${Math.min(5, state.history.length)}):`);
+        state.history.slice(0, 5).forEach(e => {
+          lines.push(`  ${e.winner} — ${e.task || 'this lead'} (${new Date(e.timestamp).toLocaleString()})`);
+        });
+      }
+      return lines.join('\n');
+    }
+
+    async function copySummaryText() {
+      try {
+        await navigator.clipboard.writeText(buildSummaryText());
+        settingsError.textContent = 'Summary copied to clipboard.';
+        setTimeout(() => { if (settingsError.textContent === 'Summary copied to clipboard.') settingsError.textContent = ''; }, 2000);
+      } catch (_) {
+        settingsError.textContent = 'Could not copy summary.';
+      }
+    }
+
+    async function copyResultText() {
+      try {
+        await navigator.clipboard.writeText(lastResultText);
+      } catch (_) { /* ignore */ }
+    }
+
+    function buildTeamLink() {
+      const base = window.location.href.split('?')[0];
+      const params = new URLSearchParams();
+      params.set('names', names.join(','));
+      params.set('mode', state.mode);
+      params.set('speed', state.speed);
+      const task = taskInputSettings.value.trim();
+      if (task) params.set('task', task);
+      return `${base}?${params.toString()}`;
+    }
+
+    async function copyTeamLink() {
+      try {
+        await navigator.clipboard.writeText(buildTeamLink());
+        settingsError.textContent = 'Team link copied! Send it to your teammates.';
+        setTimeout(() => {
+          if (settingsError.textContent.startsWith('Team link copied')) settingsError.textContent = '';
+        }, 2500);
+      } catch (_) {
+        settingsError.textContent = 'Could not copy link.';
+      }
+    }
+
+    function resetSessionCounts() {
+      names.forEach(n => { state.wins[n] = 0; });
+      initFairBag();
+      renderTally();
+      updateStatusBar();
+    }
+
+    function checkDailyReset() {
+      if (!state.dailyResetEnabled) return;
+      const now = new Date();
+      const parts = (state.dailyResetTime || '09:00').split(':');
+      const h = parseInt(parts[0], 10) || 0;
+      const m = parseInt(parts[1], 10) || 0;
+      const resetToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+      const last = state.lastDailyReset ? new Date(state.lastDailyReset) : null;
+      if (now >= resetToday && (!last || last < resetToday)) {
+        resetSessionCounts();
+        state.lastDailyReset = now.toISOString();
+        savePrefs();
+      }
+    }
+
+    function startDailyResetTimer() {
+      if (dailyResetTimer) clearInterval(dailyResetTimer);
+      checkDailyReset();
+      dailyResetTimer = setInterval(checkDailyReset, 60000);
+    }
 
     function openSettings() {
       if (state.isSpinning) return;
       settingsDraft = [...names];
+      settingsDraftExcluded = { ...state.excluded };
       settingsError.textContent = '';
-      soundToggle.checked = state.soundEnabled;
+      syncSettingsToggles();
       syncModeSpeedUI();
       applyTheme(state.theme);
       renderSettingsList();
+      renderPresets();
       settingsPage.classList.add('open');
       settingsPage.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
@@ -1381,6 +2295,9 @@
 
     function applyNames(newNames) {
       names = newNames;
+      const nextExcluded = {};
+      names.forEach(n => { nextExcluded[n] = !!state.excluded[n]; });
+      state.excluded = nextExcluded;
       initWins(true);
       initFairBag();
       state.currentRotation = 0;
@@ -1399,16 +2316,28 @@
       return [...nameListEl.querySelectorAll('.name-row input')].map(inp => inp.value);
     }
 
+    function collectDraftExcluded(nameList) {
+      const map = {};
+      nameList.forEach((name, idx) => {
+        const wrap = nameListEl.children[idx];
+        const cb = wrap?.querySelector('.exclude-cb');
+        if (name.trim()) map[name.trim()] = !!(cb && cb.checked);
+      });
+      return map;
+    }
+
     nameListEl.addEventListener('click', (e) => {
       const btn = e.target.closest('.btn-remove');
       if (!btn || btn.disabled) return;
       settingsDraft = collectDraftNames();
+      settingsDraftExcluded = collectDraftExcluded(settingsDraft);
       settingsDraft.splice(Number(btn.dataset.idx), 1);
       renderSettingsList();
     });
 
     document.getElementById('addNameBtn').addEventListener('click', () => {
       settingsDraft = collectDraftNames();
+      settingsDraftExcluded = collectDraftExcluded(settingsDraft);
       if (settingsDraft.length >= MAX_NAMES) {
         settingsError.textContent = `Maximum ${MAX_NAMES} names.`;
         return;
@@ -1416,7 +2345,7 @@
       settingsDraft.push('');
       settingsError.textContent = '';
       renderSettingsList();
-      const inputs = nameListEl.querySelectorAll('input');
+      const inputs = nameListEl.querySelectorAll('.name-row input');
       inputs[inputs.length - 1].focus();
     });
 
@@ -1427,24 +2356,29 @@
         settingsError.textContent = err;
         return;
       }
-      applyNames(draft.map(n => n.trim()));
+      const trimmed = draft.map(n => n.trim());
+      state.excluded = collectDraftExcluded(trimmed);
+      applyNames(trimmed);
       savePrefs();
       closeSettings(false);
     });
 
     document.getElementById('resetCountsBtn').addEventListener('click', () => {
-      names.forEach(n => { state.wins[n] = 0; });
-      initFairBag();
-      renderTally();
-      updateStatusBar();
+      resetSessionCounts();
       settingsError.textContent = 'Session counts reset.';
+      savePrefs();
     });
 
     document.getElementById('settingsBtn').addEventListener('click', openSettings);
     document.getElementById('settingsBack').addEventListener('click', () => closeSettings());
+    document.getElementById('historyBtn').addEventListener('click', openHistory);
+    document.getElementById('historyBack').addEventListener('click', closeHistory);
     document.getElementById('helpBtn').addEventListener('click', openHelp);
     document.getElementById('helpLinkModes').addEventListener('click', openHelp);
     document.getElementById('helpClose').addEventListener('click', closeHelp);
+    lockBtn.addEventListener('click', () => {
+      if (state.pinEnabled && !state.pinUnlocked) openPinModal();
+    });
 
     document.getElementById('themeButtons').addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-theme]');
@@ -1453,39 +2387,140 @@
       savePrefs();
     });
 
-    taskInputSettings.addEventListener('input', savePrefs);
+    taskInputSettings.addEventListener('input', () => {
+      updateStatusBar();
+      savePrefs();
+    });
 
     soundToggle.addEventListener('change', () => {
       state.soundEnabled = soundToggle.checked;
       savePrefs();
     });
 
+    confettiToggle.addEventListener('change', () => {
+      state.confettiEnabled = confettiToggle.checked;
+      savePrefs();
+    });
+
+    quickResultToggle.addEventListener('change', () => {
+      state.quickResult = quickResultToggle.checked;
+      savePrefs();
+    });
+
+    dailyResetToggle.addEventListener('change', () => {
+      state.dailyResetEnabled = dailyResetToggle.checked;
+      savePrefs();
+      startDailyResetTimer();
+    });
+
+    dailyResetTime.addEventListener('change', () => {
+      state.dailyResetTime = dailyResetTime.value || '09:00';
+      savePrefs();
+      startDailyResetTimer();
+    });
+
+    pinToggle.addEventListener('change', () => {
+      if (pinToggle.checked && !state.pinHash) {
+        settingsError.textContent = 'Save a 4-digit PIN first.';
+        pinToggle.checked = false;
+        return;
+      }
+      state.pinEnabled = pinToggle.checked;
+      if (!state.pinEnabled) state.pinUnlocked = false;
+      updateLockUI();
+      savePrefs();
+    });
+
+    document.getElementById('savePinBtn').addEventListener('click', () => {
+      const pin = document.getElementById('pinInput').value.trim();
+      if (!/^\d{4}$/.test(pin)) {
+        settingsError.textContent = 'PIN must be exactly 4 digits.';
+        return;
+      }
+      state.pinHash = hashPin(pin);
+      document.getElementById('pinInput').value = '';
+      settingsError.textContent = 'PIN saved.';
+      savePrefs();
+    });
+
+    presetList.addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-preset]');
+      if (!chip) return;
+      taskInputSettings.value = chip.dataset.preset;
+      updateStatusBar();
+      savePrefs();
+    });
+
+    presetTags.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-remove-preset]');
+      if (!btn) return;
+      const idx = Number(btn.dataset.removePreset);
+      state.taskPresets.splice(idx, 1);
+      renderPresets();
+      savePrefs();
+    });
+
+    document.getElementById('addPresetBtn').addEventListener('click', () => {
+      const val = document.getElementById('newPresetInput').value.trim();
+      if (!val) return;
+      if (state.taskPresets.includes(val)) {
+        settingsError.textContent = 'Preset already exists.';
+        return;
+      }
+      state.taskPresets.push(val);
+      document.getElementById('newPresetInput').value = '';
+      renderPresets();
+      savePrefs();
+    });
+
+    document.getElementById('copyTeamLinkBtn').addEventListener('click', copyTeamLink);
+    document.getElementById('exportHistoryBtn').addEventListener('click', exportHistoryCSV);
+    document.getElementById('exportHistoryBtn2').addEventListener('click', exportHistoryCSV);
+    document.getElementById('exportTallyBtn').addEventListener('click', exportTallyCSV);
+    document.getElementById('copySummaryBtn').addEventListener('click', copySummaryText);
+    document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+    document.getElementById('showAllHistoryBtn').addEventListener('click', () => {
+      historyShowAll = true;
+      renderHistoryList();
+    });
+
+    historySearch.addEventListener('input', renderHistoryList);
+    historyFilterPerson.addEventListener('change', () => { historyShowAll = false; renderHistoryList(); });
+    historyFilterMode.addEventListener('change', () => { historyShowAll = false; renderHistoryList(); });
+
     helpModal.addEventListener('click', (e) => {
       if (e.target === helpModal) closeHelp();
     });
 
-    document.getElementById('modeButtons').addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-mode]');
-      if (!btn || state.isSpinning) return;
-      state.mode = btn.dataset.mode;
-      document.querySelectorAll('#modeButtons button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      updateModeHint();
-      updateStatusBar();
-      savePrefs();
+    modeSelect.addEventListener('change', () => {
+      if (state.isSpinning) { modeSelect.value = state.mode; return; }
+      const newMode = modeSelect.value;
+      requirePinUnlock(() => {
+        state.mode = newMode;
+        modeSelect.value = state.mode;
+        initFairBag();
+        updateModeHint();
+        updateStatusBar();
+        savePrefs();
+      });
+      if (state.pinEnabled && !state.pinUnlocked) modeSelect.value = state.mode;
     });
 
     document.getElementById('speedButtons').addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-speed]');
       if (!btn || state.isSpinning) return;
-      state.speed = btn.dataset.speed;
-      document.querySelectorAll('#speedButtons button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      updateStatusBar();
-      savePrefs();
+      const newSpeed = btn.dataset.speed;
+      requirePinUnlock(() => {
+        state.speed = newSpeed;
+        document.querySelectorAll('#speedButtons button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateStatusBar();
+        savePrefs();
+      });
     });
 
     spinBtn.addEventListener('click', spin);
+    document.getElementById('modalCopy').addEventListener('click', copyResultText);
     document.getElementById('modalClose').addEventListener('click', hideResultModal);
     document.getElementById('modalAgain').addEventListener('click', () => {
       hideResultModal();
@@ -1496,23 +2531,61 @@
       if (e.target === resultModal) hideResultModal();
     });
 
+    pinModal.addEventListener('click', (e) => {
+      if (e.target === pinModal) closePinModal();
+    });
+    document.getElementById('pinCancel').addEventListener('click', closePinModal);
+
+    document.getElementById('pinUnlockInput').addEventListener('input', (e) => {
+      pinUnlockBuffer = e.target.value.replace(/\D/g, '').slice(0, 4);
+      e.target.value = pinUnlockBuffer;
+      updatePinDots();
+      if (pinUnlockBuffer.length === 4) tryPinUnlock(pinUnlockBuffer);
+    });
+
     document.addEventListener('keydown', (e) => {
+      if (pinModal.classList.contains('show') && /^\d$/.test(e.key)) {
+        e.preventDefault();
+        handlePinKey(e.key);
+        return;
+      }
       if (e.key === 'Escape') {
         hideResultModal();
+        closePinModal();
         if (settingsPage.classList.contains('open')) closeSettings();
+        if (historyPage.classList.contains('open')) closeHistory();
         closeHelp();
+        return;
+      }
+      if (e.key === ' ' || e.code === 'Space') {
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (settingsPage.classList.contains('open') || historyPage.classList.contains('open')) return;
+        if (helpModal.classList.contains('show') || pinModal.classList.contains('show')) return;
+        if (resultModal.classList.contains('show')) return;
+        e.preventDefault();
+        spin();
       }
     });
 
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
     loadFromStorage();
+    applyUrlParams();
     applyTheme(state.theme);
     syncModeSpeedUI();
-    soundToggle.checked = state.soundEnabled;
-    initWins();
+    syncSettingsToggles();
+    updateLockUI();
+    initWins(true);
     initFairBag();
+    Confetti.init();
     renderWheel();
     renderTally();
     updateStatusBar();
+    startDailyResetTimer();
+    savePrefs();
   </script>
 </body>
 </html>
