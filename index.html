@@ -144,16 +144,6 @@
       background: rgba(99, 102, 241, 0.1);
     }
 
-    .task-strip {
-      margin-bottom: 1rem;
-    }
-
-    .task-strip input {
-      padding: 0.6rem 0.85rem;
-      font-size: 0.9rem;
-      border-radius: 10px;
-    }
-
     .field-group { margin-bottom: 1.25rem; }
 
     label {
@@ -756,10 +746,6 @@
       <span class="status-pill" id="statusRound"></span>
     </div>
 
-    <div class="task-strip">
-      <input type="text" id="taskInput" placeholder="Task / reason (optional) — e.g. Facebook lead" autocomplete="off" aria-label="Task or reason to call">
-    </div>
-
     <div class="wheel-wrap">
       <div class="pointer" aria-hidden="true"></div>
       <div class="wheel-rotator" id="wheelRotator">
@@ -795,7 +781,7 @@
         <p class="section-label">Task / Reason</p>
         <label for="taskInputSettings">Enter Task / Reason to Call</label>
         <input type="text" id="taskInputSettings" placeholder="e.g. Facebook lead, callback request…" autocomplete="off">
-        <p class="field-hint">Shows in the result popup so everyone knows why that person was picked. Same field as on the home screen.</p>
+        <p class="field-hint">Shows in the result popup so everyone knows why that person was picked. Set it here before you spin.</p>
       </div>
 
       <div class="settings-section">
@@ -955,7 +941,6 @@
     const wheelRotator = document.getElementById('wheelRotator');
     const wheelSvg = document.getElementById('wheelSvg');
     const spinBtn = document.getElementById('spinBtn');
-    const taskInput = document.getElementById('taskInput');
     const taskInputSettings = document.getElementById('taskInputSettings');
     const modeHint = document.getElementById('modeHint');
     const statusMode = document.getElementById('statusMode');
@@ -1077,11 +1062,6 @@
       renderWheel();
     }
 
-    function syncTaskInputs(from) {
-      if (from === 'home') taskInputSettings.value = taskInput.value;
-      else taskInput.value = taskInputSettings.value;
-    }
-
     function openHelp() {
       if (state.isSpinning) return;
       helpModal.classList.add('show');
@@ -1120,7 +1100,8 @@
           theme: state.theme,
           soundEnabled: state.soundEnabled,
           mode: state.mode,
-          speed: state.speed
+          speed: state.speed,
+          task: taskInputSettings.value
         }));
       } catch (_) { /* ignore */ }
     }
@@ -1143,6 +1124,7 @@
         if (typeof data.soundEnabled === 'boolean') state.soundEnabled = data.soundEnabled;
         if (data.mode === 'fairBag' || data.mode === 'pureRandom' || data.mode === 'weighted') state.mode = data.mode;
         if (data.speed === 'quick' || data.speed === 'normal' || data.speed === 'dramatic') state.speed = data.speed;
+        if (typeof data.task === 'string') taskInputSettings.value = data.task;
       } catch (_) { /* ignore */ }
       if (names.length < MIN_NAMES) names = [...DEFAULT_NAMES];
     }
@@ -1343,7 +1325,7 @@
         state.wins[winner]++;
         renderTally();
         updateStatusBar();
-        showResultModal(winner, taskInput.value);
+        showResultModal(winner, taskInputSettings.value);
 
         state.isSpinning = false;
         setControlsDisabled(false);
@@ -1372,7 +1354,6 @@
       settingsDraft = [...names];
       settingsError.textContent = '';
       soundToggle.checked = state.soundEnabled;
-      taskInputSettings.value = taskInput.value;
       syncModeSpeedUI();
       applyTheme(state.theme);
       renderSettingsList();
@@ -1446,7 +1427,6 @@
         settingsError.textContent = err;
         return;
       }
-      syncTaskInputs('settings');
       applyNames(draft.map(n => n.trim()));
       savePrefs();
       closeSettings(false);
@@ -1473,8 +1453,7 @@
       savePrefs();
     });
 
-    taskInput.addEventListener('input', () => syncTaskInputs('home'));
-    taskInputSettings.addEventListener('input', () => syncTaskInputs('settings'));
+    taskInputSettings.addEventListener('input', savePrefs);
 
     soundToggle.addEventListener('change', () => {
       state.soundEnabled = soundToggle.checked;
