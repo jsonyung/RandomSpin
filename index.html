@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fair Ads Spinner</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg1: #0f172a;
+      --bg2: #1e293b;
+      --card: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --seg0: #ef4444;
+      --seg1: #3b82f6;
+      --seg2: #22c55e;
+      --seg3: #f59e0b;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 50%, #312e81 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem 1.75rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .field-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .segmented {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .segmented button {
+      flex: 1;
+      min-width: 0;
+      padding: 0.55rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .segmented button:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .segmented button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .segmented button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .mode-hint {
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .round-info {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Wheel */
+    .wheel-wrap {
+      position: relative;
+      width: min(320px, 85vw);
+      aspect-ratio: 1;
+      margin: 0 auto 1.25rem;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 28px solid #fff;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+      z-index: 10;
+    }
+
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--seg0) 0deg 90deg,
+        var(--seg1) 90deg 180deg,
+        var(--seg2) 180deg 270deg,
+        var(--seg3) 270deg 360deg
+      );
+      border: 4px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.2), inset 0 0 30px rgba(0, 0, 0, 0.15);
+      position: relative;
+      will-change: transform;
+    }
+
+    .wheel-labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .wheel-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 42%;
+      text-align: center;
+      font-weight: 800;
+      font-size: clamp(0.85rem, 3.5vw, 1.05rem);
+      color: #fff;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      transform-origin: 0 0;
+    }
+
+    .wheel-label:nth-child(1) { transform: rotate(45deg) translateX(55%) rotate(-45deg); }
+    .wheel-label:nth-child(2) { transform: rotate(135deg) translateX(55%) rotate(-135deg); }
+    .wheel-label:nth-child(3) { transform: rotate(225deg) translateX(55%) rotate(-225deg); }
+    .wheel-label:nth-child(4) { transform: rotate(315deg) translateX(55%) rotate(-315deg); }
+
+    .spin-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      background: linear-gradient(145deg, var(--accent), #4338ca);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      z-index: 5;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+    }
+
+    .spin-btn:hover:not(:disabled) {
+      transform: translate(-50%, -50%) scale(1.06);
+      box-shadow: 0 6px 28px rgba(99, 102, 241, 0.65);
+    }
+
+    .spin-btn:active:not(:disabled) {
+      transform: translate(-50%, -50%) scale(0.97);
+    }
+
+    .spin-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    /* Tally */
+    .tally {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tally-item {
+      text-align: center;
+      padding: 0.5rem 0.25rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .tally-name {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .tally-count {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-top: 0.15rem;
+    }
+
+    .tally-item:nth-child(1) .tally-count { color: var(--seg0); }
+    .tally-item:nth-child(2) .tally-count { color: var(--seg1); }
+    .tally-item:nth-child(3) .tally-count { color: var(--seg2); }
+    .tally-item:nth-child(4) .tally-count { color: var(--seg3); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: linear-gradient(160deg, #1e293b, #0f172a);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem 1.75rem;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-title {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-winner {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .modal-message {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .modal-actions button {
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn-close {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border: 1px solid var(--border) !important;
+    }
+
+    .btn-close:hover { background: rgba(255, 255, 255, 0.18); }
+
+    .btn-again {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-again:hover { background: var(--accent-hover); }
+
+    .modal-actions button:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Fair Ads Spinner</h1>
+    <p class="subtitle">Let the wheel decide — no arguments</p>
+
+    <div class="field-group">
+      <label for="taskInput">Enter Task / Reason to Call</label>
+      <input type="text" id="taskInput" placeholder="e.g. Facebook lead, callback request…" autocomplete="off">
+    </div>
+
+    <div class="field-group">
+      <label>Assignment Mode</label>
+      <div class="segmented" id="modeButtons">
+        <button type="button" data-mode="fairBag" class="active">Fair Bag</button>
+        <button type="button" data-mode="pureRandom">Pure Random</button>
+        <button type="button" data-mode="weighted">Weighted</button>
+      </div>
+      <p class="mode-hint" id="modeHint">Shuffled deck — everyone gets exactly 1 per round of 4.</p>
+    </div>
+
+    <div class="field-group">
+      <label>Spin Speed</label>
+      <div class="segmented" id="speedButtons">
+        <button type="button" data-speed="quick">Quick</button>
+        <button type="button" data-speed="normal" class="active">Normal</button>
+        <button type="button" data-speed="dramatic">Dramatic</button>
+      </div>
+    </div>
+
+    <p class="round-info" id="roundInfo"></p>
+
+    <div class="wheel-wrap">
+      <div class="pointer" aria-hidden="true"></div>
+      <div class="wheel" id="wheel">
+        <div class="wheel-labels">
+          <span class="wheel-label">Peter</span>
+          <span class="wheel-label">Simon</span>
+          <span class="wheel-label">Shaun</span>
+          <span class="wheel-label">Danny</span>
+        </div>
+      </div>
+      <button type="button" class="spin-btn" id="spinBtn">SPIN</button>
+    </div>
+
+    <div class="tally" id="tally"></div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalWinner">
+    <div class="modal">
+      <div class="modal-icon">🎯</div>
+      <p class="modal-title">Result</p>
+      <p class="modal-winner" id="modalWinner"></p>
+      <p class="modal-message" id="modalMessage"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-close" id="modalClose">Close</button>
+        <button type="button" class="btn-again" id="modalAgain">Spin Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const NAMES = ['Peter', 'Simon', 'Shaun', 'Danny'];
+
+    const MODE_HINTS = {
+      fairBag: 'Shuffled deck — everyone gets exactly 1 per round of 4.',
+      pureRandom: 'Fresh 25% chance every spin — repeats allowed.',
+      weighted: 'Catch-up mode — fewer wins means higher chance next spin.'
+    };
+
+    const SPEED_CONFIG = {
+      quick:    { duration: 1.0, extraTurns: 3 },
+      normal:   { duration: 3.5, extraTurns: 6 },
+      dramatic: { duration: 5.5, extraTurns: 8 }
+    };
+
+    const state = {
+      mode: 'fairBag',
+      speed: 'normal',
+      currentRotation: 0,
+      isSpinning: false,
+      wins: Object.fromEntries(NAMES.map(n => [n, 0])),
+      fairBagDeck: [],
+      fairBagRound: 1,
+      fairBagSpinInRound: 0
+    };
+
+    const wheel = document.getElementById('wheel');
+    const spinBtn = document.getElementById('spinBtn');
+    const taskInput = document.getElementById('taskInput');
+    const modeHint = document.getElementById('modeHint');
+    const roundInfo = document.getElementById('roundInfo');
+    const tallyEl = document.getElementById('tally');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalWinner = document.getElementById('modalWinner');
+    const modalMessage = document.getElementById('modalMessage');
+
+    function fisherYates(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function refillFairBagDeck() {
+      state.fairBagDeck = fisherYates(NAMES);
+      state.fairBagSpinInRound = 0;
+      state.fairBagRound++;
+    }
+
+    function initFairBag() {
+      state.fairBagDeck = fisherYates(NAMES);
+      state.fairBagRound = 1;
+      state.fairBagSpinInRound = 0;
+    }
+
+    function pickFairBag() {
+      if (state.fairBagDeck.length === 0) refillFairBagDeck();
+      state.fairBagSpinInRound++;
+      return state.fairBagDeck.shift();
+    }
+
+    function pickPureRandom() {
+      return NAMES[Math.floor(Math.random() * NAMES.length)];
+    }
+
+    function pickWeighted() {
+      const weights = NAMES.map(n => 1 / (state.wins[n] + 1));
+      const total = weights.reduce((s, w) => s + w, 0);
+      let r = Math.random() * total;
+      for (let i = 0; i < NAMES.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return NAMES[i];
+      }
+      return NAMES[NAMES.length - 1];
+    }
+
+    function pickWinner() {
+      switch (state.mode) {
+        case 'fairBag': return pickFairBag();
+        case 'pureRandom': return pickPureRandom();
+        case 'weighted': return pickWeighted();
+        default: return pickPureRandom();
+      }
+    }
+
+    function landingAngleForIndex(index) {
+      return 360 - index * 90 - 45;
+    }
+
+    function renderTally() {
+      tallyEl.innerHTML = NAMES.map(name => `
+        <div class="tally-item">
+          <div class="tally-name">${name}</div>
+          <div class="tally-count">${state.wins[name]}</div>
+        </div>
+      `).join('');
+    }
+
+    function updateRoundInfo() {
+      if (state.mode === 'fairBag') {
+        const spin = state.fairBagSpinInRound === 0 ? 1 : state.fairBagSpinInRound;
+        roundInfo.textContent = `Round ${state.fairBagRound} · spin ${spin} of 4`;
+      } else {
+        roundInfo.textContent = '';
+      }
+    }
+
+    function setControlsDisabled(disabled) {
+      spinBtn.disabled = disabled;
+      document.querySelectorAll('#modeButtons button, #speedButtons button').forEach(btn => {
+        btn.disabled = disabled;
+      });
+    }
+
+    function showModal(winner, task) {
+      const taskLabel = task.trim() || 'this lead';
+      modalWinner.textContent = winner;
+      modalMessage.textContent = `${winner} has been chosen for ${taskLabel}!`;
+      modalOverlay.classList.add('show');
+    }
+
+    function hideModal() {
+      modalOverlay.classList.remove('show');
+    }
+
+    function spin() {
+      if (state.isSpinning) return;
+
+      const winner = pickWinner();
+      const winnerIndex = NAMES.indexOf(winner);
+      const { duration, extraTurns } = SPEED_CONFIG[state.speed];
+
+      const landing = landingAngleForIndex(winnerIndex);
+      const currentMod = state.currentRotation % 360;
+      let delta = landing - currentMod;
+      if (delta <= 0) delta += 360;
+
+      const targetRotation = state.currentRotation + 360 * extraTurns + delta;
+      state.isSpinning = true;
+      setControlsDisabled(true);
+
+      wheel.style.transition = `transform ${duration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
+      wheel.style.transform = `rotate(${targetRotation}deg)`;
+      state.currentRotation = targetRotation;
+
+      const onEnd = (e) => {
+        if (e.propertyName !== 'transform') return;
+        wheel.removeEventListener('transitionend', onEnd);
+
+        state.wins[winner]++;
+        renderTally();
+        updateRoundInfo();
+
+        const task = taskInput.value;
+        showModal(winner, task);
+
+        state.isSpinning = false;
+        setControlsDisabled(false);
+      };
+
+      wheel.addEventListener('transitionend', onEnd);
+    }
+
+    document.getElementById('modeButtons').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-mode]');
+      if (!btn || state.isSpinning) return;
+      state.mode = btn.dataset.mode;
+      document.querySelectorAll('#modeButtons button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      modeHint.textContent = MODE_HINTS[state.mode];
+      updateRoundInfo();
+    });
+
+    document.getElementById('speedButtons').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-speed]');
+      if (!btn || state.isSpinning) return;
+      state.speed = btn.dataset.speed;
+      document.querySelectorAll('#speedButtons button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+
+    spinBtn.addEventListener('click', spin);
+    document.getElementById('modalClose').addEventListener('click', hideModal);
+    document.getElementById('modalAgain').addEventListener('click', () => {
+      hideModal();
+      spin();
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) hideModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hideModal();
+    });
+
+    initFairBag();
+    renderTally();
+    updateRoundInfo();
+  </script>
+</body>
+</html>
