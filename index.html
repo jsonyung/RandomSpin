@@ -16,10 +16,6 @@
       --muted: #94a3b8;
       --accent: #6366f1;
       --accent-hover: #818cf8;
-      --seg0: #ef4444;
-      --seg1: #3b82f6;
-      --seg2: #22c55e;
-      --seg3: #f59e0b;
     }
 
     body {
@@ -44,13 +40,43 @@
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
     }
 
-    h1 {
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .header-row h1 {
+      flex: 1;
       text-align: center;
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.02em;
-      margin-bottom: 0.25rem;
     }
+
+    .settings-btn {
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--muted);
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: -2px;
+    }
+
+    .settings-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--text);
+      background: rgba(99, 102, 241, 0.15);
+    }
+
+    .settings-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .subtitle {
       text-align: center;
@@ -59,9 +85,7 @@
       margin-bottom: 1.5rem;
     }
 
-    .field-group {
-      margin-bottom: 1.25rem;
-    }
+    .field-group { margin-bottom: 1.25rem; }
 
     label {
       display: block;
@@ -85,9 +109,7 @@
       transition: border-color 0.2s;
     }
 
-    input[type="text"]:focus {
-      border-color: var(--accent);
-    }
+    input[type="text"]:focus { border-color: var(--accent); }
 
     .segmented {
       display: flex;
@@ -139,7 +161,6 @@
       margin-bottom: 0.75rem;
     }
 
-    /* Wheel */
     .wheel-wrap {
       position: relative;
       width: min(320px, 85vw);
@@ -161,45 +182,26 @@
       z-index: 10;
     }
 
-    .wheel {
+    .wheel-rotator {
       width: 100%;
       height: 100%;
-      border-radius: 50%;
-      background: conic-gradient(
-        var(--seg0) 0deg 90deg,
-        var(--seg1) 90deg 180deg,
-        var(--seg2) 180deg 270deg,
-        var(--seg3) 270deg 360deg
-      );
-      border: 4px solid rgba(255, 255, 255, 0.25);
-      box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.2), inset 0 0 30px rgba(0, 0, 0, 0.15);
-      position: relative;
       will-change: transform;
     }
 
-    .wheel-labels {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
+    .wheel-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
     }
 
-    .wheel-label {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 42%;
-      text-align: center;
+    .wheel-svg text {
+      font-family: 'Segoe UI', system-ui, sans-serif;
       font-weight: 800;
-      font-size: clamp(0.85rem, 3.5vw, 1.05rem);
-      color: #fff;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-      transform-origin: 0 0;
+      fill: #fff;
+      pointer-events: none;
+      text-shadow: none;
     }
-
-    .wheel-label:nth-child(1) { transform: rotate(45deg) translateX(55%) rotate(-45deg); }
-    .wheel-label:nth-child(2) { transform: rotate(135deg) translateX(55%) rotate(-135deg); }
-    .wheel-label:nth-child(3) { transform: rotate(225deg) translateX(55%) rotate(-225deg); }
-    .wheel-label:nth-child(4) { transform: rotate(315deg) translateX(55%) rotate(-315deg); }
 
     .spin-btn {
       position: absolute;
@@ -235,10 +237,8 @@
       cursor: not-allowed;
     }
 
-    /* Tally */
     .tally {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
       gap: 0.5rem;
       margin-bottom: 0.5rem;
     }
@@ -255,6 +255,9 @@
       font-size: 0.7rem;
       color: var(--muted);
       font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .tally-count {
@@ -263,12 +266,6 @@
       margin-top: 0.15rem;
     }
 
-    .tally-item:nth-child(1) .tally-count { color: var(--seg0); }
-    .tally-item:nth-child(2) .tally-count { color: var(--seg1); }
-    .tally-item:nth-child(3) .tally-count { color: var(--seg2); }
-    .tally-item:nth-child(4) .tally-count { color: var(--seg3); }
-
-    /* Modal */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -302,14 +299,16 @@
       box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
     }
 
-    .modal-overlay.show .modal {
-      transform: scale(1);
+    .modal.modal-wide {
+      max-width: 420px;
+      text-align: left;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
-    .modal-icon {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-    }
+    .modal-overlay.show .modal { transform: scale(1); }
+
+    .modal-icon { font-size: 2.5rem; margin-bottom: 0.5rem; text-align: center; }
 
     .modal-title {
       font-size: 0.85rem;
@@ -317,6 +316,22 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       margin-bottom: 0.5rem;
+    }
+
+    .modal-title-left {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: none;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+
+    .modal-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      line-height: 1.45;
     }
 
     .modal-winner {
@@ -340,9 +355,12 @@
       display: flex;
       gap: 0.75rem;
       justify-content: center;
+      flex-wrap: wrap;
     }
 
-    .modal-actions button {
+    .modal-actions button,
+    .name-row button,
+    .btn-add-name {
       padding: 0.65rem 1.25rem;
       border-radius: 10px;
       font-size: 0.9rem;
@@ -360,19 +378,95 @@
 
     .btn-close:hover { background: rgba(255, 255, 255, 0.18); }
 
-    .btn-again {
+    .btn-primary {
       background: var(--accent);
       color: #fff;
     }
 
-    .btn-again:hover { background: var(--accent-hover); }
+    .btn-primary:hover { background: var(--accent-hover); }
 
-    .modal-actions button:active { transform: scale(0.97); }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35) !important;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.28); }
+
+    .modal-actions button:active,
+    .name-row button:active,
+    .btn-add-name:active { transform: scale(0.97); }
+
+    .name-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .name-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .name-row input {
+      flex: 1;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    .name-row .btn-remove {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .name-row .btn-remove:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    .name-row .btn-remove:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-add-name {
+      width: 100%;
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--accent-hover);
+      border: 1px dashed rgba(99, 102, 241, 0.45) !important;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-add-name:hover { background: rgba(99, 102, 241, 0.22); }
+
+    .settings-error {
+      color: #f87171;
+      font-size: 0.82rem;
+      margin-bottom: 0.75rem;
+      min-height: 1.2em;
+    }
   </style>
 </head>
 <body>
   <div class="app">
-    <h1>Fair Ads Spinner</h1>
+    <div class="header-row">
+      <h1>Fair Ads Spinner</h1>
+      <button type="button" class="settings-btn" id="settingsBtn" title="Settings" aria-label="Open settings">⚙</button>
+    </div>
     <p class="subtitle">Let the wheel decide — no arguments</p>
 
     <div class="field-group">
@@ -387,7 +481,7 @@
         <button type="button" data-mode="pureRandom">Pure Random</button>
         <button type="button" data-mode="weighted">Weighted</button>
       </div>
-      <p class="mode-hint" id="modeHint">Shuffled deck — everyone gets exactly 1 per round of 4.</p>
+      <p class="mode-hint" id="modeHint"></p>
     </div>
 
     <div class="field-group">
@@ -403,13 +497,8 @@
 
     <div class="wheel-wrap">
       <div class="pointer" aria-hidden="true"></div>
-      <div class="wheel" id="wheel">
-        <div class="wheel-labels">
-          <span class="wheel-label">Peter</span>
-          <span class="wheel-label">Simon</span>
-          <span class="wheel-label">Shaun</span>
-          <span class="wheel-label">Danny</span>
-        </div>
+      <div class="wheel-rotator" id="wheelRotator">
+        <svg class="wheel-svg" id="wheelSvg" viewBox="0 0 200 200" aria-hidden="true"></svg>
       </div>
       <button type="button" class="spin-btn" id="spinBtn">SPIN</button>
     </div>
@@ -417,7 +506,7 @@
     <div class="tally" id="tally"></div>
   </div>
 
-  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalWinner">
+  <div class="modal-overlay" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="modalWinner">
     <div class="modal">
       <div class="modal-icon">🎯</div>
       <p class="modal-title">Result</p>
@@ -425,19 +514,32 @@
       <p class="modal-message" id="modalMessage"></p>
       <div class="modal-actions">
         <button type="button" class="btn-close" id="modalClose">Close</button>
-        <button type="button" class="btn-again" id="modalAgain">Spin Again</button>
+        <button type="button" class="btn-primary" id="modalAgain">Spin Again</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal modal-wide">
+      <p class="modal-title-left" id="settingsTitle">⚙ Team Settings</p>
+      <p class="modal-sub">Edit names, add or remove people. Changes save to this browser. Minimum 2, maximum 12.</p>
+      <div class="name-list" id="nameList"></div>
+      <button type="button" class="btn-add-name" id="addNameBtn">+ Add Person</button>
+      <p class="settings-error" id="settingsError"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-danger" id="resetCountsBtn">Reset Counts</button>
+        <button type="button" class="btn-close" id="settingsCancel">Cancel</button>
+        <button type="button" class="btn-primary" id="settingsSave">Save</button>
       </div>
     </div>
   </div>
 
   <script>
-    const NAMES = ['Peter', 'Simon', 'Shaun', 'Danny'];
-
-    const MODE_HINTS = {
-      fairBag: 'Shuffled deck — everyone gets exactly 1 per round of 4.',
-      pureRandom: 'Fresh 25% chance every spin — repeats allowed.',
-      weighted: 'Catch-up mode — fewer wins means higher chance next spin.'
-    };
+    const STORAGE_KEY = 'fairAdsSpinner_v1';
+    const DEFAULT_NAMES = ['Peter', 'Simon', 'Shaun', 'Danny'];
+    const MAX_NAMES = 12;
+    const MIN_NAMES = 2;
+    const SEG_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16', '#e879f9', '#fb7185'];
 
     const SPEED_CONFIG = {
       quick:    { duration: 1.0, extraTurns: 3 },
@@ -445,26 +547,75 @@
       dramatic: { duration: 5.5, extraTurns: 8 }
     };
 
+    let names = [...DEFAULT_NAMES];
+
     const state = {
       mode: 'fairBag',
       speed: 'normal',
       currentRotation: 0,
       isSpinning: false,
-      wins: Object.fromEntries(NAMES.map(n => [n, 0])),
+      wins: {},
       fairBagDeck: [],
       fairBagRound: 1,
       fairBagSpinInRound: 0
     };
 
-    const wheel = document.getElementById('wheel');
+    const wheelRotator = document.getElementById('wheelRotator');
+    const wheelSvg = document.getElementById('wheelSvg');
     const spinBtn = document.getElementById('spinBtn');
     const taskInput = document.getElementById('taskInput');
     const modeHint = document.getElementById('modeHint');
     const roundInfo = document.getElementById('roundInfo');
     const tallyEl = document.getElementById('tally');
-    const modalOverlay = document.getElementById('modalOverlay');
+    const resultModal = document.getElementById('resultModal');
+    const settingsModal = document.getElementById('settingsModal');
     const modalWinner = document.getElementById('modalWinner');
     const modalMessage = document.getElementById('modalMessage');
+    const nameListEl = document.getElementById('nameList');
+    const settingsError = document.getElementById('settingsError');
+
+    function getNames() { return names; }
+
+    function modeHintText() {
+      const n = names.length;
+      const pct = Math.round(100 / n);
+      return {
+        fairBag: `Shuffled deck — everyone gets exactly 1 per round of ${n}.`,
+        pureRandom: `Fresh ${pct}% chance every spin — repeats allowed.`,
+        weighted: 'Catch-up mode — fewer wins means higher chance next spin.'
+      }[state.mode];
+    }
+
+    function updateModeHint() {
+      modeHint.textContent = modeHintText();
+    }
+
+    function initWins(keepExisting = false) {
+      const next = {};
+      names.forEach(n => {
+        next[n] = keepExisting && state.wins[n] != null ? state.wins[n] : 0;
+      });
+      state.wins = next;
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ names: [...names] }));
+      } catch (_) { /* ignore */ }
+    }
+
+    function loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (Array.isArray(data.names) && data.names.length >= MIN_NAMES) {
+          names = data.names.map(n => String(n).trim()).filter(Boolean).slice(0, MAX_NAMES);
+          if (names.length >= MIN_NAMES) return;
+        }
+      } catch (_) { /* ignore */ }
+      names = [...DEFAULT_NAMES];
+    }
 
     function fisherYates(arr) {
       const a = [...arr];
@@ -475,16 +626,16 @@
       return a;
     }
 
-    function refillFairBagDeck() {
-      state.fairBagDeck = fisherYates(NAMES);
-      state.fairBagSpinInRound = 0;
-      state.fairBagRound++;
-    }
-
     function initFairBag() {
-      state.fairBagDeck = fisherYates(NAMES);
+      state.fairBagDeck = fisherYates(names);
       state.fairBagRound = 1;
       state.fairBagSpinInRound = 0;
+    }
+
+    function refillFairBagDeck() {
+      state.fairBagDeck = fisherYates(names);
+      state.fairBagSpinInRound = 0;
+      state.fairBagRound++;
     }
 
     function pickFairBag() {
@@ -494,18 +645,18 @@
     }
 
     function pickPureRandom() {
-      return NAMES[Math.floor(Math.random() * NAMES.length)];
+      return names[Math.floor(Math.random() * names.length)];
     }
 
     function pickWeighted() {
-      const weights = NAMES.map(n => 1 / (state.wins[n] + 1));
+      const weights = names.map(n => 1 / (state.wins[n] + 1));
       const total = weights.reduce((s, w) => s + w, 0);
       let r = Math.random() * total;
-      for (let i = 0; i < NAMES.length; i++) {
+      for (let i = 0; i < names.length; i++) {
         r -= weights[i];
-        if (r <= 0) return NAMES[i];
+        if (r <= 0) return names[i];
       }
-      return NAMES[NAMES.length - 1];
+      return names[names.length - 1];
     }
 
     function pickWinner() {
@@ -517,15 +668,71 @@
       }
     }
 
+    function segmentSize() {
+      return 360 / names.length;
+    }
+
     function landingAngleForIndex(index) {
-      return 360 - index * 90 - 45;
+      const seg = segmentSize();
+      return 360 - index * seg - seg / 2;
+    }
+
+    function polarToCartesian(cx, cy, r, deg) {
+      const rad = (deg - 90) * Math.PI / 180;
+      return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+    }
+
+    function describeArc(cx, cy, r, startDeg, endDeg) {
+      const start = polarToCartesian(cx, cy, r, endDeg);
+      const end = polarToCartesian(cx, cy, r, startDeg);
+      const large = endDeg - startDeg <= 180 ? 0 : 1;
+      return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${large} 0 ${end.x} ${end.y} Z`;
+    }
+
+    function fitFontSize(name, segDeg) {
+      const len = name.length;
+      if (segDeg >= 60) return len > 8 ? 11 : len > 5 ? 13 : 15;
+      if (segDeg >= 45) return len > 8 ? 9 : len > 5 ? 11 : 13;
+      return len > 6 ? 8 : 10;
+    }
+
+    function renderWheel() {
+      const n = names.length;
+      const seg = 360 / n;
+      const cx = 100, cy = 100, outerR = 98, innerR = 38;
+      let svg = '';
+
+      for (let i = 0; i < n; i++) {
+        const start = i * seg;
+        const end = (i + 1) * seg;
+        const color = SEG_COLORS[i % SEG_COLORS.length];
+        svg += `<path d="${describeArc(cx, cy, outerR, start, end)}" fill="${color}" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>`;
+      }
+
+      svg += `<circle cx="${cx}" cy="${cy}" r="${innerR}" fill="#1e293b" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>`;
+
+      for (let i = 0; i < n; i++) {
+        const mid = (i + 0.5) * seg;
+        const pos = polarToCartesian(cx, cy, 68, mid);
+        const fs = fitFontSize(names[i], seg);
+        let rot = mid;
+        if (mid > 90 && mid < 270) rot += 180;
+        svg += `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" transform="rotate(${rot}, ${pos.x}, ${pos.y})">${escapeHtml(names[i])}</text>`;
+      }
+
+      wheelSvg.innerHTML = svg;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function renderTally() {
-      tallyEl.innerHTML = NAMES.map(name => `
+      tallyEl.style.gridTemplateColumns = `repeat(${Math.min(names.length, 4)}, 1fr)`;
+      tallyEl.innerHTML = names.map((name, i) => `
         <div class="tally-item">
-          <div class="tally-name">${name}</div>
-          <div class="tally-count">${state.wins[name]}</div>
+          <div class="tally-name">${escapeHtml(name)}</div>
+          <div class="tally-count" style="color:${SEG_COLORS[i % SEG_COLORS.length]}">${state.wins[name]}</div>
         </div>
       `).join('');
     }
@@ -533,7 +740,7 @@
     function updateRoundInfo() {
       if (state.mode === 'fairBag') {
         const spin = state.fairBagSpinInRound === 0 ? 1 : state.fairBagSpinInRound;
-        roundInfo.textContent = `Round ${state.fairBagRound} · spin ${spin} of 4`;
+        roundInfo.textContent = `Round ${state.fairBagRound} · spin ${spin} of ${names.length}`;
       } else {
         roundInfo.textContent = '';
       }
@@ -541,27 +748,28 @@
 
     function setControlsDisabled(disabled) {
       spinBtn.disabled = disabled;
+      document.getElementById('settingsBtn').disabled = disabled;
       document.querySelectorAll('#modeButtons button, #speedButtons button').forEach(btn => {
         btn.disabled = disabled;
       });
     }
 
-    function showModal(winner, task) {
+    function showResultModal(winner, task) {
       const taskLabel = task.trim() || 'this lead';
       modalWinner.textContent = winner;
       modalMessage.textContent = `${winner} has been chosen for ${taskLabel}!`;
-      modalOverlay.classList.add('show');
+      resultModal.classList.add('show');
     }
 
-    function hideModal() {
-      modalOverlay.classList.remove('show');
+    function hideResultModal() {
+      resultModal.classList.remove('show');
     }
 
     function spin() {
-      if (state.isSpinning) return;
+      if (state.isSpinning || names.length < MIN_NAMES) return;
 
       const winner = pickWinner();
-      const winnerIndex = NAMES.indexOf(winner);
+      const winnerIndex = names.indexOf(winner);
       const { duration, extraTurns } = SPEED_CONFIG[state.speed];
 
       const landing = landingAngleForIndex(winnerIndex);
@@ -573,27 +781,125 @@
       state.isSpinning = true;
       setControlsDisabled(true);
 
-      wheel.style.transition = `transform ${duration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
-      wheel.style.transform = `rotate(${targetRotation}deg)`;
+      wheelRotator.style.transition = `transform ${duration}s cubic-bezier(0.17, 0.67, 0.12, 0.99)`;
+      wheelRotator.style.transform = `rotate(${targetRotation}deg)`;
       state.currentRotation = targetRotation;
 
       const onEnd = (e) => {
         if (e.propertyName !== 'transform') return;
-        wheel.removeEventListener('transitionend', onEnd);
+        wheelRotator.removeEventListener('transitionend', onEnd);
 
         state.wins[winner]++;
         renderTally();
         updateRoundInfo();
-
-        const task = taskInput.value;
-        showModal(winner, task);
+        showResultModal(winner, taskInput.value);
 
         state.isSpinning = false;
         setControlsDisabled(false);
       };
 
-      wheel.addEventListener('transitionend', onEnd);
+      wheelRotator.addEventListener('transitionend', onEnd);
     }
+
+    function renderSettingsList() {
+      nameListEl.innerHTML = '';
+      settingsDraft.forEach((name, idx) => {
+        const row = document.createElement('div');
+        row.className = 'name-row';
+        row.innerHTML = `
+          <input type="text" value="${escapeHtml(name)}" data-idx="${idx}" maxlength="24" aria-label="Person name">
+          <button type="button" class="btn-remove" data-idx="${idx}" title="Remove" ${settingsDraft.length <= MIN_NAMES ? 'disabled' : ''}>×</button>
+        `;
+        nameListEl.appendChild(row);
+      });
+    }
+
+    let settingsDraft = [];
+
+    function openSettings() {
+      if (state.isSpinning) return;
+      settingsDraft = [...names];
+      settingsError.textContent = '';
+      renderSettingsList();
+      settingsModal.classList.add('show');
+    }
+
+    function closeSettings() {
+      settingsModal.classList.remove('show');
+      settingsError.textContent = '';
+    }
+
+    function validateNames(list) {
+      const trimmed = list.map(n => n.trim()).filter(Boolean);
+      if (trimmed.length < MIN_NAMES) return 'Need at least 2 names.';
+      if (trimmed.length > MAX_NAMES) return `Maximum ${MAX_NAMES} names.`;
+      const lower = trimmed.map(n => n.toLowerCase());
+      if (new Set(lower).size !== lower.length) return 'Names must be unique.';
+      return null;
+    }
+
+    function applyNames(newNames) {
+      names = newNames;
+      initWins(true);
+      initFairBag();
+      state.currentRotation = 0;
+      wheelRotator.style.transition = 'none';
+      wheelRotator.style.transform = 'rotate(0deg)';
+      void wheelRotator.offsetHeight;
+      wheelRotator.style.transition = '';
+      renderWheel();
+      renderTally();
+      updateRoundInfo();
+      updateModeHint();
+      saveToStorage();
+    }
+
+    function collectDraftNames() {
+      return [...nameListEl.querySelectorAll('.name-row input')].map(inp => inp.value);
+    }
+
+    nameListEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-remove');
+      if (!btn || btn.disabled) return;
+      settingsDraft = collectDraftNames();
+      settingsDraft.splice(Number(btn.dataset.idx), 1);
+      renderSettingsList();
+    });
+
+    document.getElementById('addNameBtn').addEventListener('click', () => {
+      settingsDraft = collectDraftNames();
+      if (settingsDraft.length >= MAX_NAMES) {
+        settingsError.textContent = `Maximum ${MAX_NAMES} names.`;
+        return;
+      }
+      settingsDraft.push('');
+      settingsError.textContent = '';
+      renderSettingsList();
+      const inputs = nameListEl.querySelectorAll('input');
+      inputs[inputs.length - 1].focus();
+    });
+
+    document.getElementById('settingsSave').addEventListener('click', () => {
+      const draft = collectDraftNames();
+      const err = validateNames(draft);
+      if (err) {
+        settingsError.textContent = err;
+        return;
+      }
+      applyNames(draft.map(n => n.trim()));
+      closeSettings();
+    });
+
+    document.getElementById('resetCountsBtn').addEventListener('click', () => {
+      names.forEach(n => { state.wins[n] = 0; });
+      initFairBag();
+      renderTally();
+      updateRoundInfo();
+      settingsError.textContent = 'Session counts reset.';
+    });
+
+    document.getElementById('settingsBtn').addEventListener('click', openSettings);
+    document.getElementById('settingsCancel').addEventListener('click', closeSettings);
 
     document.getElementById('modeButtons').addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-mode]');
@@ -601,7 +907,7 @@
       state.mode = btn.dataset.mode;
       document.querySelectorAll('#modeButtons button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      modeHint.textContent = MODE_HINTS[state.mode];
+      updateModeHint();
       updateRoundInfo();
     });
 
@@ -614,23 +920,34 @@
     });
 
     spinBtn.addEventListener('click', spin);
-    document.getElementById('modalClose').addEventListener('click', hideModal);
+    document.getElementById('modalClose').addEventListener('click', hideResultModal);
     document.getElementById('modalAgain').addEventListener('click', () => {
-      hideModal();
+      hideResultModal();
       spin();
     });
 
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) hideModal();
+    resultModal.addEventListener('click', (e) => {
+      if (e.target === resultModal) hideResultModal();
+    });
+
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) closeSettings();
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') hideModal();
+      if (e.key === 'Escape') {
+        hideResultModal();
+        closeSettings();
+      }
     });
 
+    loadFromStorage();
+    initWins();
     initFairBag();
+    renderWheel();
     renderTally();
     updateRoundInfo();
+    updateModeHint();
   </script>
 </body>
 </html>
