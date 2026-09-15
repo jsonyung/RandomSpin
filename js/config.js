@@ -1,6 +1,6 @@
 /** App constants */
 export const STORAGE_KEY = 'fairAdsSpinner_v5';
-export const APP_VERSION = 7;
+export const APP_VERSION = 8;
 export const VALID_MODES = ['fairBag', 'pureRandom', 'weighted', 'antiRepeat', 'lastExcluded', 'lowestFirst', 'strictBalance'];
 export const MODE_LABELS = {
   fairBag: 'Fair Bag',

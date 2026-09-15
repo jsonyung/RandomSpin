@@ -1,4 +1,4 @@
-const CACHE = 'fair-ads-spinner-v5';
+const CACHE = 'fair-ads-spinner-v6';
 const ASSETS = [
   './',
   './index.html',

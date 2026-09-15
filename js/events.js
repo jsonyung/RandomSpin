@@ -131,7 +131,7 @@ el.dailyResetToggle.addEventListener('change', () => {
 });
 
 el.dailyResetTime.addEventListener('change', () => {
-  state.el.dailyResetTime = el.dailyResetTime.value || '09:00';
+  state.dailyResetTime = el.dailyResetTime.value || '09:00';
   app.savePrefs();
   app.startDailyResetTimer();
 });

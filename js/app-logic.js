@@ -31,7 +31,7 @@ export const SpinAudio = {
     osc.frequency.setValueAtTime(920, t);
     osc.frequency.exponentialRampToValueAtTime(480, t + 0.04);
     gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.22 * state.el.soundVolume, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.22 * state.soundVolume, t + 0.004);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
@@ -55,7 +55,7 @@ export const SpinAudio = {
     filter.Q.value = 0.8;
     const gain = this.ctx.createGain();
     gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.12 * state.el.soundVolume, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.12 * state.soundVolume, t + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
     src.connect(filter);
     filter.connect(gain);
@@ -73,7 +73,7 @@ export const SpinAudio = {
       osc.frequency.value = freq;
       const start = t + i * 0.09;
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.18 * state.el.soundVolume, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.18 * state.soundVolume, start + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.28);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
@@ -194,10 +194,6 @@ export async function verifyPin(pin) {
   return h === state.pinHash;
 }
 
-const el.pinLockBanner = document.getElementById('el.pinLockBanner');
-const el.assignmentSection = document.getElementById('el.assignmentSection');
-const el.animationSection = document.getElementById('el.animationSection');
-
 export function showSettingsToast(msg, ms = 2800) {
   el.settingsError.textContent = msg;
   el.settingsError.classList.add('settings-toast');
@@ -295,11 +291,10 @@ export function applyTheme(theme) {
 }
 
 export function showHomeToast(msg, ms = 2600) {
-  const el = document.getElementById('el.homeToast');
-  el.textContent = msg;
-  el.classList.add('show');
+  el.homeToast.textContent = msg;
+  el.homeToast.classList.add('show');
   clearTimeout(showHomeToast._t);
-  showHomeToast._t = setTimeout(() => el.classList.remove('show'), ms);
+  showHomeToast._t = setTimeout(() => el.homeToast.classList.remove('show'), ms);
 }
 
 export function getSpinConfig() {
@@ -322,15 +317,14 @@ export function syncFairBagDeckWithEligible() {
 }
 
 export function updateLastResultStrip() {
-  const el = document.getElementById('el.lastResultStrip');
   if (!state.history.length) {
-    el.innerHTML = '';
+    el.lastResultStrip.innerHTML = '';
     return;
   }
   const e = state.history[0];
   const task = e.task || 'this lead';
   const when = formatRelativeTime(e.timestamp);
-  el.innerHTML = `Last: <strong>${escapeHtml(e.winner)}</strong> · ${escapeHtml(task)} · ${when}` +
+  el.lastResultStrip.innerHTML = `Last: <strong>${escapeHtml(e.winner)}</strong> · ${escapeHtml(task)} · ${when}` +
     (undoSnapshot ? ` <button type="button" id="undoFromStrip">Undo</button>` : '');
   const undoBtn = document.getElementById('undoFromStrip');
   if (undoBtn) undoBtn.addEventListener('click', undoLastSpin);
@@ -366,28 +360,26 @@ export function getRecentTasks() {
 }
 
 export function renderRecentTasks() {
-  const el = document.getElementById('el.recentTasks');
   const recent = getRecentTasks();
-  if (!recent.length) { el.innerHTML = ''; return; }
-  el.innerHTML = recent.map(t =>
+  if (!recent.length) { el.recentTasks.innerHTML = ''; return; }
+  el.recentTasks.innerHTML = recent.map(t =>
     `<button type="button" class="recent-task-chip" data-recent-task="${escapeHtml(t)}">${escapeHtml(t)}</button>`
   ).join('');
 }
 
 export function renderFairBagPanel() {
-  const panel = document.getElementById('el.fairBagPanel');
   if (state.mode !== 'fairBag') {
-    panel.style.display = 'none';
+    el.fairBagPanel.style.display = 'none';
     return;
   }
   const remaining = state.fairBagDeck.filter(n => getEligibleNames().includes(n));
   if (!remaining.length) {
-    panel.style.display = 'none';
+    el.fairBagPanel.style.display = 'none';
     return;
   }
-  panel.style.display = 'flex';
+  el.fairBagPanel.style.display = 'flex';
   const next = remaining[0];
-  panel.innerHTML = `<span class="fairbag-label">Still this round · next up: ${escapeHtml(next)}</span>` +
+  el.fairBagPanel.innerHTML = `<span class="fairbag-label">Still this round · next up: ${escapeHtml(next)}</span>` +
     remaining.map(n =>
       `<span class="remaining-chip${n === next ? ' next' : ''}">${escapeHtml(n)}</span>`
     ).join('');
@@ -480,15 +472,14 @@ export const WIZARD_OPTIONS = [
 
 export function openModeWizard() {
   if (state.isSpinning) return;
-  const opts = document.getElementById('el.wizardOptions');
-  opts.innerHTML = WIZARD_OPTIONS.map((o, i) =>
+  el.wizardOptions.innerHTML = WIZARD_OPTIONS.map((o, i) =>
     `<button type="button" class="wizard-opt" data-wizard-idx="${i}">${o.label}${o.sub ? `<br><span style="font-weight:400;font-size:0.78rem;color:var(--muted)">${o.sub}</span>` : ''}</button>`
   ).join('');
-  document.getElementById('el.modeWizardModal').classList.add('show');
+  el.modeWizardModal.classList.add('show');
 }
 
 export function closeModeWizard() {
-  document.getElementById('el.modeWizardModal').classList.remove('show');
+  el.modeWizardModal.classList.remove('show');
 }
 
 export function applyWizardChoice(idx) {
@@ -579,14 +570,14 @@ export function savePrefs() {
       pinEnabled: state.pinEnabled,
       pinHash: state.pinHash,
       dailyResetEnabled: state.dailyResetEnabled,
-      el.dailyResetTime: state.el.dailyResetTime,
+      dailyResetTime: state.dailyResetTime,
       lastDailyReset: state.lastDailyReset,
       fairBagRound: state.fairBagRound,
       fairBagSpinInRound: state.fairBagSpinInRound,
       lastWinner: state.lastWinner,
       tourSeen: state.tourSeen,
       installBannerDismissed: state.installBannerDismissed,
-      el.soundVolume: state.el.soundVolume,
+      soundVolume: state.soundVolume,
       requireTaskBeforeSpin: state.requireTaskBeforeSpin,
       pinLockResetCounts: state.pinLockResetCounts,
       appVersion: APP_VERSION
@@ -624,14 +615,16 @@ export function loadFromStorage() {
     if (typeof data.pinEnabled === 'boolean') state.pinEnabled = data.pinEnabled;
     if (typeof data.pinHash === 'string') state.pinHash = data.pinHash;
     if (typeof data.dailyResetEnabled === 'boolean') state.dailyResetEnabled = data.dailyResetEnabled;
-    if (typeof data.el.dailyResetTime === 'string') state.el.dailyResetTime = data.el.dailyResetTime;
+    if (typeof data.dailyResetTime === 'string') state.dailyResetTime = data.dailyResetTime;
+    else if (typeof data['el.dailyResetTime'] === 'string') state.dailyResetTime = data['el.dailyResetTime'];
     if (data.lastDailyReset) state.lastDailyReset = data.lastDailyReset;
     if (typeof data.fairBagRound === 'number') state.fairBagRound = data.fairBagRound;
     if (typeof data.fairBagSpinInRound === 'number') state.fairBagSpinInRound = data.fairBagSpinInRound;
     if (typeof data.lastWinner === 'string') state.lastWinner = data.lastWinner;
     if (typeof data.tourSeen === 'boolean') state.tourSeen = data.tourSeen;
     if (typeof data.installBannerDismissed === 'boolean') state.installBannerDismissed = data.installBannerDismissed;
-    if (typeof data.el.soundVolume === 'number') state.el.soundVolume = Math.min(1, Math.max(0, data.el.soundVolume));
+    if (typeof data.soundVolume === 'number') state.soundVolume = Math.min(1, Math.max(0, data.soundVolume));
+    else if (typeof data['el.soundVolume'] === 'number') state.soundVolume = Math.min(1, Math.max(0, data['el.soundVolume']));
     if (typeof data.requireTaskBeforeSpin === 'boolean') state.requireTaskBeforeSpin = data.requireTaskBeforeSpin;
     if (typeof data.pinLockResetCounts === 'boolean') state.pinLockResetCounts = data.pinLockResetCounts;
   } catch (_) { /* ignore */ }
@@ -1047,22 +1040,22 @@ export function syncSettingsToggles() {
   el.confettiToggle.checked = state.confettiEnabled;
   el.quickResultToggle.checked = state.quickResult;
   el.pinToggle.checked = state.pinEnabled;
-  document.getElementById('el.pinLockResetToggle').checked = state.pinLockResetCounts;
-  document.getElementById('el.requireTaskToggle').checked = state.requireTaskBeforeSpin;
+  el.pinLockResetToggle.checked = state.pinLockResetCounts;
+  el.requireTaskToggle.checked = state.requireTaskBeforeSpin;
   el.dailyResetToggle.checked = state.dailyResetEnabled;
-  el.dailyResetTime.value = state.el.dailyResetTime || '09:00';
-  const vol = Math.round((state.el.soundVolume ?? 0.8) * 100);
-  document.getElementById('el.soundVolume').value = vol;
-  document.getElementById('el.volumeLabel').textContent = `${vol}%`;
-  document.getElementById('el.volumeRow').style.opacity = state.soundEnabled ? '1' : '0.45';
+  el.dailyResetTime.value = state.dailyResetTime || '09:00';
+  const vol = Math.round((state.soundVolume ?? 0.8) * 100);
+  el.soundVolume.value = vol;
+  el.volumeLabel.textContent = `${vol}%`;
+  el.volumeRow.style.opacity = state.soundEnabled ? '1' : '0.45';
 }
 
 export function getFilteredHistory() {
   const q = el.historySearch.value.trim().toLowerCase();
   const person = el.historyFilterPerson.value;
   const mode = el.historyFilterMode.value;
-  const dateFilter = document.getElementById('el.historyFilterDate')?.value || '';
-  const taskFilter = document.getElementById('el.historyFilterTask')?.value || '';
+  const dateFilter = el.historyFilterDate?.value || '';
+  const taskFilter = el.historyFilterTask?.value || '';
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const startOfWeek = startOfToday - ((now.getDay() + 6) % 7) * 86400000;
@@ -1081,7 +1074,6 @@ export function getFilteredHistory() {
 }
 
 export function renderHistoryStats() {
-  const el = document.getElementById('el.historyStats');
   const filtered = getFilteredHistory();
   const total = filtered.length;
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
@@ -1089,7 +1081,7 @@ export function renderHistoryStats() {
   const byPerson = {};
   filtered.forEach(e => { byPerson[e.winner] = (byPerson[e.winner] || 0) + 1; });
   const top = Object.entries(byPerson).sort((a, b) => b[1] - a[1])[0];
-  el.innerHTML = `
+  el.historyStats.innerHTML = `
     <div class="history-stat"><div class="val">${total}</div><div class="lbl">Spins</div></div>
     <div class="history-stat"><div class="val">${today}</div><div class="lbl">Today</div></div>
     <div class="history-stat"><div class="val">${top ? top[1] : 0}</div><div class="lbl">${top ? escapeHtml(top[0]) : 'Top'}</div></div>
@@ -1116,14 +1108,13 @@ export function undoLastSpin() {
 }
 
 export function renderHistoryChart() {
-  const el = document.getElementById('el.historyChart');
   const filtered = getFilteredHistory();
   const counts = {};
   filtered.forEach(e => { counts[e.winner] = (counts[e.winner] || 0) + 1; });
   const entries = names.map(n => [n, counts[n] || 0]).sort((a, b) => b[1] - a[1]);
   const max = Math.max(1, ...entries.map(e => e[1]));
-  if (!filtered.length) { el.innerHTML = ''; return; }
-  el.innerHTML = entries.map(([name, count]) => `
+  if (!filtered.length) { el.historyChart.innerHTML = ''; return; }
+  el.historyChart.innerHTML = entries.map(([name, count]) => `
     <div class="chart-bar-row">
       <span class="chart-bar-label">${escapeHtml(name)}</span>
       <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(count / max * 100)}%"></div></div>
@@ -1139,7 +1130,7 @@ export function renderHistoryFilters() {
   el.historyFilterMode.innerHTML = '<option value="">All modes</option>' +
     VALID_MODES.map(m => `<option value="${m}">${escapeHtml(MODE_LABELS[m])}</option>`).join('');
   const tasks = [...new Set(state.history.map(h => h.task || '').filter(Boolean))].sort();
-  document.getElementById('el.historyFilterTask').innerHTML = '<option value="">All tasks</option>' +
+  el.historyFilterTask.innerHTML = '<option value="">All tasks</option>' +
     tasks.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
 }
 
@@ -1149,7 +1140,7 @@ export function renderHistoryList() {
   const filtered = getFilteredHistory();
   const limit = historyShowAll ? filtered.length : HISTORY_DEFAULT_SHOW;
   const shown = filtered.slice(0, limit);
-  const showAllBtn = document.getElementById('el.showAllHistoryBtn');
+  const showAllBtn = el.showAllHistoryBtn;
 
   if (!filtered.length) {
     el.historyList.innerHTML = '<p class="history-empty">No spins recorded yet.</p>';
@@ -1181,8 +1172,8 @@ export function openHistory() {
   if (state.isSpinning) return;
   historyShowAll = false;
   el.historySearch.value = '';
-  document.getElementById('el.historyFilterDate').value = '';
-  document.getElementById('el.historyFilterTask').value = '';
+  el.historyFilterDate.value = '';
+  el.historyFilterTask.value = '';
   el.historyFilterPerson.value = '';
   el.historyFilterMode.value = '';
   renderHistoryFilters();
@@ -1316,7 +1307,7 @@ export function resetSessionCounts() {
 export function checkDailyReset() {
   if (!state.dailyResetEnabled) return;
   const now = new Date();
-  const parts = (state.el.dailyResetTime || '09:00').split(':');
+  const parts = (state.dailyResetTime || '09:00').split(':');
   const h = parseInt(parts[0], 10) || 0;
   const m = parseInt(parts[1], 10) || 0;
   const resetToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
@@ -1421,7 +1412,7 @@ export function buildBackupData() {
       pinEnabled: state.pinEnabled,
       pinHash: state.pinHash,
       dailyResetEnabled: state.dailyResetEnabled,
-      el.dailyResetTime: state.el.dailyResetTime,
+      dailyResetTime: state.dailyResetTime,
       fairBagRound: state.fairBagRound,
       fairBagSpinInRound: state.fairBagSpinInRound,
       lastWinner: state.lastWinner
@@ -1462,7 +1453,8 @@ export function importFullBackup(file) {
       if (typeof s.pinEnabled === 'boolean') state.pinEnabled = s.pinEnabled;
       if (typeof s.pinHash === 'string') state.pinHash = s.pinHash;
       if (typeof s.dailyResetEnabled === 'boolean') state.dailyResetEnabled = s.dailyResetEnabled;
-      if (s.el.dailyResetTime) state.el.dailyResetTime = s.el.dailyResetTime;
+      if (typeof s.dailyResetTime === 'string') state.dailyResetTime = s.dailyResetTime;
+      else if (typeof s['el.dailyResetTime'] === 'string') state.dailyResetTime = s['el.dailyResetTime'];
       if (typeof s.fairBagRound === 'number') state.fairBagRound = s.fairBagRound;
       if (typeof s.fairBagSpinInRound === 'number') state.fairBagSpinInRound = s.fairBagSpinInRound;
       if (s.lastWinner) state.lastWinner = s.lastWinner;
@@ -1487,7 +1479,7 @@ export function importFullBackup(file) {
 
 export function startTour() {
   tourStep = 0;
-  document.getElementById('el.tourOverlay').classList.add('show');
+  el.tourOverlay.classList.add('show');
   renderTourStep();
 }
 
@@ -1502,7 +1494,7 @@ export function renderTourStep() {
 }
 
 export function endTour() {
-  document.getElementById('el.tourOverlay').classList.remove('show');
+  el.tourOverlay.classList.remove('show');
   state.tourSeen = true;
   savePrefs();
 }
@@ -1512,7 +1504,7 @@ export function setupInstallBanner() {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    document.getElementById('el.installBanner').classList.add('show');
+    el.installBanner.classList.add('show');
   });
 }
 
@@ -1520,19 +1512,19 @@ export function setupServiceWorkerUpdates() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./sw.js').then(reg => {
     swRegistration = reg;
-    if (reg.waiting) document.getElementById('el.updateBanner').classList.add('show');
+    if (reg.waiting) el.updateBanner.classList.add('show');
     reg.addEventListener('updatefound', () => {
       const nw = reg.installing;
       if (!nw) return;
       nw.addEventListener('statechange', () => {
         if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-          document.getElementById('el.updateBanner').classList.add('show');
+          el.updateBanner.classList.add('show');
         }
       });
     });
   }).catch(() => {});
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    document.getElementById('el.updateBanner').classList.remove('show');
+    el.updateBanner.classList.remove('show');
   });
 }
 
