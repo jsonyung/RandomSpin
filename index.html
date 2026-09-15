@@ -1127,7 +1127,8 @@
           <input type="password" id="pinInput" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" autocomplete="off">
           <button type="button" id="savePinBtn">Save PIN</button>
         </div>
-        <p class="field-hint">PIN is stored locally as a simple hash. Unlock once per session to change fairness settings.</p>
+        <p class="field-hint">PIN is stored only on this browser — not on a server. Unlock once per session to change mode/speed. <strong style="color:var(--text)">Forgot PIN?</strong> You can set a new one below anytime (no old PIN needed), or use Reset PIN.</p>
+        <button type="button" class="help-link" id="resetPinBtn" style="margin-top:0.5rem">Reset PIN lock (forgot PIN)</button>
       </div>
 
       <div class="settings-section">
@@ -1273,7 +1274,7 @@
     <div class="modal">
       <div class="modal-icon">🔒</div>
       <p class="modal-title" id="pinModalTitle">Enter PIN</p>
-      <p class="modal-sub">Unlock to change assignment mode or spin speed.</p>
+      <p class="modal-sub">Unlock to change assignment mode or spin speed. Forgot PIN? Open Settings → set a new PIN, or tap Reset PIN lock.</p>
       <div class="pin-dots" id="pinDots">
         <span class="pin-dot"></span>
         <span class="pin-dot"></span>
@@ -2429,6 +2430,18 @@
       if (!state.pinEnabled) state.pinUnlocked = false;
       updateLockUI();
       savePrefs();
+    });
+
+    document.getElementById('resetPinBtn').addEventListener('click', () => {
+      if (!confirm('Remove PIN lock and clear saved PIN on this browser?\n\nAnyone with access to Settings can do this — PIN is not recoverable from a server.')) return;
+      state.pinHash = null;
+      state.pinEnabled = false;
+      state.pinUnlocked = false;
+      pinToggle.checked = false;
+      document.getElementById('pinInput').value = '';
+      updateLockUI();
+      savePrefs();
+      settingsError.textContent = 'PIN lock removed. You can set a new PIN anytime.';
     });
 
     document.getElementById('savePinBtn').addEventListener('click', () => {
