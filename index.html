@@ -61,12 +61,12 @@
 
     .app {
       width: 100%;
-      max-width: 480px;
+      max-width: 420px;
       background: var(--card);
       backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 2rem 1.75rem;
+      padding: 1.5rem 1.5rem 1.75rem;
       box-shadow: 0 25px 50px -12px var(--shadow);
       transition: background 0.3s, border-color 0.3s;
     }
@@ -116,8 +116,42 @@
     .subtitle {
       text-align: center;
       color: var(--muted);
-      font-size: 0.875rem;
-      margin-bottom: 1.5rem;
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .status-pill {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .status-pill.accent {
+      color: var(--accent);
+      border-color: rgba(99, 102, 241, 0.35);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .task-strip {
+      margin-bottom: 1rem;
+    }
+
+    .task-strip input {
+      padding: 0.6rem 0.85rem;
+      font-size: 0.9rem;
+      border-radius: 10px;
     }
 
     .field-group { margin-bottom: 1.25rem; }
@@ -219,9 +253,9 @@
 
     .wheel-wrap {
       position: relative;
-      width: min(320px, 85vw);
+      width: min(340px, 88vw);
       aspect-ratio: 1;
-      margin: 0 auto 1.25rem;
+      margin: 0 auto 1rem;
     }
 
     .pointer {
@@ -623,12 +657,91 @@
       transform: translateX(20px);
       background: #fff;
     }
+
+    .settings-page {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: linear-gradient(160deg, var(--modal-bg1), var(--modal-bg2));
+      transform: translateX(100%);
+      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .settings-page.open { transform: translateX(0); }
+
+    .settings-inner {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 1.25rem 1.5rem 2rem;
+      min-height: 100%;
+    }
+
+    .settings-top {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      position: sticky;
+      top: 0;
+      background: linear-gradient(160deg, var(--modal-bg1) 80%, transparent);
+      padding: 0.25rem 0 0.75rem;
+      z-index: 1;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .settings-top h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .settings-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-section:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.65rem;
+    }
   </style>
 </head>
 <body data-theme="dark">
   <div class="app">
     <div class="header-row">
-      <button type="button" class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle dark or light mode">🌙</button>
+      <div aria-hidden="true"></div>
       <h1>Fair Ads Spinner</h1>
       <div class="header-actions">
         <button type="button" class="icon-btn" id="helpBtn" title="How it works" aria-label="Open help guide">?</button>
@@ -637,33 +750,15 @@
     </div>
     <p class="subtitle">Let the wheel decide — no arguments</p>
 
-    <div class="field-group">
-      <label for="taskInput">Enter Task / Reason to Call</label>
-      <input type="text" id="taskInput" placeholder="e.g. Facebook lead, callback request…" autocomplete="off">
-      <p class="field-hint">Type what this lead is for (ad name, callback, etc.). It shows in the result so everyone knows why that person was picked — optional but useful for the team.</p>
+    <div class="status-bar" id="statusBar">
+      <span class="status-pill accent" id="statusMode">Fair Bag</span>
+      <span class="status-pill" id="statusSpeed">Normal</span>
+      <span class="status-pill" id="statusRound"></span>
     </div>
 
-    <div class="field-group">
-      <label>Assignment Mode</label>
-      <div class="segmented" id="modeButtons">
-        <button type="button" data-mode="fairBag" class="active">Fair Bag</button>
-        <button type="button" data-mode="pureRandom">Pure Random</button>
-        <button type="button" data-mode="weighted">Weighted</button>
-      </div>
-      <p class="mode-hint" id="modeHint"></p>
-      <button type="button" class="help-link" id="helpLinkModes">Read full guide: Fair Bag vs Random vs Weighted →</button>
+    <div class="task-strip">
+      <input type="text" id="taskInput" placeholder="Task / reason (optional) — e.g. Facebook lead" autocomplete="off" aria-label="Task or reason to call">
     </div>
-
-    <div class="field-group">
-      <label>Spin Speed</label>
-      <div class="segmented" id="speedButtons">
-        <button type="button" data-speed="quick">Quick</button>
-        <button type="button" data-speed="normal" class="active">Normal</button>
-        <button type="button" data-speed="dramatic">Dramatic</button>
-      </div>
-    </div>
-
-    <p class="round-info" id="roundInfo"></p>
 
     <div class="wheel-wrap">
       <div class="pointer" aria-hidden="true"></div>
@@ -689,24 +784,72 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-    <div class="modal modal-wide">
-      <p class="modal-title-left" id="settingsTitle">⚙ Team Settings</p>
-      <p class="modal-sub">Edit names, add or remove people. Changes save to this browser. Minimum 2, maximum 12.</p>
-      <div class="name-list" id="nameList"></div>
-      <button type="button" class="btn-add-name" id="addNameBtn">+ Add Person</button>
-      <div class="setting-row">
-        <label for="soundToggle">Spin sounds</label>
-        <label class="toggle">
-          <input type="checkbox" id="soundToggle" checked>
-          <span class="toggle-slider"></span>
-        </label>
+  <div class="settings-page" id="settingsPage" aria-hidden="true">
+    <div class="settings-inner">
+      <div class="settings-top">
+        <button type="button" class="back-btn" id="settingsBack">← Back</button>
+        <h2 id="settingsTitle">Settings</h2>
       </div>
+
+      <div class="settings-section">
+        <p class="section-label">Task / Reason</p>
+        <label for="taskInputSettings">Enter Task / Reason to Call</label>
+        <input type="text" id="taskInputSettings" placeholder="e.g. Facebook lead, callback request…" autocomplete="off">
+        <p class="field-hint">Shows in the result popup so everyone knows why that person was picked. Same field as on the home screen.</p>
+      </div>
+
+      <div class="settings-section">
+        <p class="section-label">Assignment</p>
+        <label>Assignment Mode</label>
+        <div class="segmented" id="modeButtons">
+          <button type="button" data-mode="fairBag" class="active">Fair Bag</button>
+          <button type="button" data-mode="pureRandom">Pure Random</button>
+          <button type="button" data-mode="weighted">Weighted</button>
+        </div>
+        <p class="mode-hint" id="modeHint"></p>
+        <button type="button" class="help-link" id="helpLinkModes">Read full guide →</button>
+      </div>
+
+      <div class="settings-section">
+        <p class="section-label">Animation</p>
+        <label>Spin Speed</label>
+        <div class="segmented" id="speedButtons">
+          <button type="button" data-speed="quick">Quick</button>
+          <button type="button" data-speed="normal" class="active">Normal</button>
+          <button type="button" data-speed="dramatic">Dramatic</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <p class="section-label">Team</p>
+        <label>People on the wheel</label>
+        <p class="field-hint" style="margin-bottom:0.65rem">Minimum 2, maximum 12. Saved to this browser.</p>
+        <div class="name-list" id="nameList"></div>
+        <button type="button" class="btn-add-name" id="addNameBtn">+ Add Person</button>
+      </div>
+
+      <div class="settings-section">
+        <p class="section-label">Preferences</p>
+        <div class="setting-row" style="border-top:none;margin-top:0;padding-top:0">
+          <label for="soundToggle">Spin sounds</label>
+          <label class="toggle">
+            <input type="checkbox" id="soundToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <label>Theme</label>
+          <div class="segmented" id="themeButtons" style="flex:1;max-width:180px">
+            <button type="button" data-theme="dark" class="active">Dark</button>
+            <button type="button" data-theme="light">Light</button>
+          </div>
+        </div>
+      </div>
+
       <p class="settings-error" id="settingsError"></p>
-      <div class="modal-actions">
+      <div class="modal-actions" style="justify-content:stretch">
         <button type="button" class="btn-danger" id="resetCountsBtn">Reset Counts</button>
-        <button type="button" class="btn-close" id="settingsCancel">Cancel</button>
-        <button type="button" class="btn-primary" id="settingsSave">Save</button>
+        <button type="button" class="btn-primary" id="settingsSave" style="flex:1">Save & Back</button>
       </div>
     </div>
   </div>
@@ -780,7 +923,9 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'fairAdsSpinner_v2';
+    const STORAGE_KEY = 'fairAdsSpinner_v3';
+    const MODE_LABELS = { fairBag: 'Fair Bag', pureRandom: 'Pure Random', weighted: 'Weighted' };
+    const SPEED_LABELS = { quick: 'Quick', normal: 'Normal', dramatic: 'Dramatic' };
     const DEFAULT_NAMES = ['Peter', 'Simon', 'Shaun', 'Danny'];
     const MAX_NAMES = 12;
     const MIN_NAMES = 2;
@@ -811,17 +956,19 @@
     const wheelSvg = document.getElementById('wheelSvg');
     const spinBtn = document.getElementById('spinBtn');
     const taskInput = document.getElementById('taskInput');
+    const taskInputSettings = document.getElementById('taskInputSettings');
     const modeHint = document.getElementById('modeHint');
-    const roundInfo = document.getElementById('roundInfo');
+    const statusMode = document.getElementById('statusMode');
+    const statusSpeed = document.getElementById('statusSpeed');
+    const statusRound = document.getElementById('statusRound');
     const tallyEl = document.getElementById('tally');
     const resultModal = document.getElementById('resultModal');
-    const settingsModal = document.getElementById('settingsModal');
+    const settingsPage = document.getElementById('settingsPage');
     const modalWinner = document.getElementById('modalWinner');
     const modalMessage = document.getElementById('modalMessage');
     const nameListEl = document.getElementById('nameList');
     const settingsError = document.getElementById('settingsError');
     const helpModal = document.getElementById('helpModal');
-    const themeBtn = document.getElementById('themeBtn');
     const soundToggle = document.getElementById('soundToggle');
 
     const SpinAudio = {
@@ -924,14 +1071,15 @@
     function applyTheme(theme) {
       state.theme = theme;
       document.body.setAttribute('data-theme', theme);
-      themeBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
-      themeBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+      document.querySelectorAll('#themeButtons button').forEach(b => {
+        b.classList.toggle('active', b.dataset.theme === theme);
+      });
       renderWheel();
     }
 
-    function toggleTheme() {
-      applyTheme(state.theme === 'dark' ? 'light' : 'dark');
-      savePrefs();
+    function syncTaskInputs(from) {
+      if (from === 'home') taskInputSettings.value = taskInput.value;
+      else taskInput.value = taskInputSettings.value;
     }
 
     function openHelp() {
@@ -970,7 +1118,9 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
           names: [...names],
           theme: state.theme,
-          soundEnabled: state.soundEnabled
+          soundEnabled: state.soundEnabled,
+          mode: state.mode,
+          speed: state.speed
         }));
       } catch (_) { /* ignore */ }
     }
@@ -981,7 +1131,9 @@
 
     function loadFromStorage() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('fairAdsSpinner_v1');
+        const raw = localStorage.getItem(STORAGE_KEY)
+          || localStorage.getItem('fairAdsSpinner_v2')
+          || localStorage.getItem('fairAdsSpinner_v1');
         if (!raw) return;
         const data = JSON.parse(raw);
         if (Array.isArray(data.names) && data.names.length >= MIN_NAMES) {
@@ -989,6 +1141,8 @@
         }
         if (data.theme === 'light' || data.theme === 'dark') state.theme = data.theme;
         if (typeof data.soundEnabled === 'boolean') state.soundEnabled = data.soundEnabled;
+        if (data.mode === 'fairBag' || data.mode === 'pureRandom' || data.mode === 'weighted') state.mode = data.mode;
+        if (data.speed === 'quick' || data.speed === 'normal' || data.speed === 'dramatic') state.speed = data.speed;
       } catch (_) { /* ignore */ }
       if (names.length < MIN_NAMES) names = [...DEFAULT_NAMES];
     }
@@ -1114,12 +1268,25 @@
       `).join('');
     }
 
-    function updateRoundInfo() {
+    function syncModeSpeedUI() {
+      document.querySelectorAll('#modeButtons button').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === state.mode);
+      });
+      document.querySelectorAll('#speedButtons button').forEach(b => {
+        b.classList.toggle('active', b.dataset.speed === state.speed);
+      });
+      updateModeHint();
+    }
+
+    function updateStatusBar() {
+      statusMode.textContent = MODE_LABELS[state.mode];
+      statusSpeed.textContent = SPEED_LABELS[state.speed];
       if (state.mode === 'fairBag') {
         const spin = state.fairBagSpinInRound === 0 ? 1 : state.fairBagSpinInRound;
-        roundInfo.textContent = `Round ${state.fairBagRound} · spin ${spin} of ${names.length}`;
+        statusRound.textContent = `Round ${state.fairBagRound} · ${spin}/${names.length}`;
+        statusRound.style.display = '';
       } else {
-        roundInfo.textContent = '';
+        statusRound.style.display = 'none';
       }
     }
 
@@ -1127,7 +1294,6 @@
       spinBtn.disabled = disabled;
       document.getElementById('settingsBtn').disabled = disabled;
       document.getElementById('helpBtn').disabled = disabled;
-      themeBtn.disabled = disabled;
       document.querySelectorAll('#modeButtons button, #speedButtons button').forEach(btn => {
         btn.disabled = disabled;
       });
@@ -1176,7 +1342,7 @@
 
         state.wins[winner]++;
         renderTally();
-        updateRoundInfo();
+        updateStatusBar();
         showResultModal(winner, taskInput.value);
 
         state.isSpinning = false;
@@ -1206,13 +1372,21 @@
       settingsDraft = [...names];
       settingsError.textContent = '';
       soundToggle.checked = state.soundEnabled;
+      taskInputSettings.value = taskInput.value;
+      syncModeSpeedUI();
+      applyTheme(state.theme);
       renderSettingsList();
-      settingsModal.classList.add('show');
+      settingsPage.classList.add('open');
+      settingsPage.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
     }
 
-    function closeSettings() {
-      settingsModal.classList.remove('show');
+    function closeSettings(revertNames = true) {
+      settingsPage.classList.remove('open');
+      settingsPage.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
       settingsError.textContent = '';
+      if (revertNames) settingsDraft = [...names];
     }
 
     function validateNames(list) {
@@ -1235,8 +1409,8 @@
       wheelRotator.style.transition = '';
       renderWheel();
       renderTally();
-      updateRoundInfo();
-      updateModeHint();
+      updateStatusBar();
+      syncModeSpeedUI();
       saveToStorage();
     }
 
@@ -1272,24 +1446,35 @@
         settingsError.textContent = err;
         return;
       }
+      syncTaskInputs('settings');
       applyNames(draft.map(n => n.trim()));
-      closeSettings();
+      savePrefs();
+      closeSettings(false);
     });
 
     document.getElementById('resetCountsBtn').addEventListener('click', () => {
       names.forEach(n => { state.wins[n] = 0; });
       initFairBag();
       renderTally();
-      updateRoundInfo();
+      updateStatusBar();
       settingsError.textContent = 'Session counts reset.';
     });
 
     document.getElementById('settingsBtn').addEventListener('click', openSettings);
-    document.getElementById('settingsCancel').addEventListener('click', closeSettings);
+    document.getElementById('settingsBack').addEventListener('click', () => closeSettings());
     document.getElementById('helpBtn').addEventListener('click', openHelp);
     document.getElementById('helpLinkModes').addEventListener('click', openHelp);
     document.getElementById('helpClose').addEventListener('click', closeHelp);
-    themeBtn.addEventListener('click', toggleTheme);
+
+    document.getElementById('themeButtons').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-theme]');
+      if (!btn) return;
+      applyTheme(btn.dataset.theme);
+      savePrefs();
+    });
+
+    taskInput.addEventListener('input', () => syncTaskInputs('home'));
+    taskInputSettings.addEventListener('input', () => syncTaskInputs('settings'));
 
     soundToggle.addEventListener('change', () => {
       state.soundEnabled = soundToggle.checked;
@@ -1307,7 +1492,8 @@
       document.querySelectorAll('#modeButtons button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       updateModeHint();
-      updateRoundInfo();
+      updateStatusBar();
+      savePrefs();
     });
 
     document.getElementById('speedButtons').addEventListener('click', (e) => {
@@ -1316,6 +1502,8 @@
       state.speed = btn.dataset.speed;
       document.querySelectorAll('#speedButtons button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      updateStatusBar();
+      savePrefs();
     });
 
     spinBtn.addEventListener('click', spin);
@@ -1329,27 +1517,23 @@
       if (e.target === resultModal) hideResultModal();
     });
 
-    settingsModal.addEventListener('click', (e) => {
-      if (e.target === settingsModal) closeSettings();
-    });
-
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         hideResultModal();
-        closeSettings();
+        if (settingsPage.classList.contains('open')) closeSettings();
         closeHelp();
       }
     });
 
     loadFromStorage();
     applyTheme(state.theme);
+    syncModeSpeedUI();
     soundToggle.checked = state.soundEnabled;
     initWins();
     initFairBag();
     renderWheel();
     renderTally();
-    updateRoundInfo();
-    updateModeHint();
+    updateStatusBar();
   </script>
 </body>
 </html>
