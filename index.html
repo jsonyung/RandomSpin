@@ -783,6 +783,34 @@
 
     .preset-chip:hover { border-color: var(--accent); color: var(--accent); }
 
+    .preset-chip-wrap {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--btn-bg);
+      overflow: hidden;
+    }
+
+    .preset-chip-wrap .preset-chip {
+      border: none;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .preset-chip-remove {
+      padding: 0.35rem 0.5rem;
+      border: none;
+      border-left: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .preset-chip-remove:hover { color: #f87171; background: rgba(239,68,68,0.1); }
+
     .preset-manage {
       display: flex;
       gap: 0.5rem;
@@ -969,16 +997,16 @@
   <canvas id="confetti" aria-hidden="true"></canvas>
   <div class="app">
     <div class="header-row">
-      <button type="button" class="icon-btn lock-btn" id="lockBtn" title="PIN locked" aria-label="PIN locked" style="display:none">🔒</button>
+      <button type="button" class="icon-btn lock-btn" id="lockBtn" title="Mode locked — enter PIN in Settings to unlock" aria-label="PIN locked" style="display:none">🔒</button>
       <div id="headerSpacer" aria-hidden="true"></div>
       <h1>Fair Ads Spinner</h1>
       <div class="header-actions">
-        <button type="button" class="icon-btn" id="helpBtn" title="How it works" aria-label="Open help guide">?</button>
-        <button type="button" class="icon-btn" id="historyBtn" title="Spin history" aria-label="Open history">🕐</button>
-        <button type="button" class="icon-btn" id="settingsBtn" title="Settings" aria-label="Open settings">⚙</button>
+        <button type="button" class="icon-btn" id="helpBtn" title="How it works — full guide" aria-label="Open help guide">?</button>
+        <button type="button" class="icon-btn" id="historyBtn" title="Spin history — last 500 picks" aria-label="Open spin history">🕐</button>
+        <button type="button" class="icon-btn" id="settingsBtn" title="Settings — task, team, modes" aria-label="Open settings">⚙</button>
       </div>
     </div>
-    <p class="subtitle" id="homeSubtitle">Press Space to spin</p>
+    <p class="subtitle" id="homeSubtitle">Tap SPIN or press Space · Set task in ⚙ Settings</p>
 
     <div class="status-bar" id="statusBar">
       <span class="status-pill accent" id="statusMode">Fair Bag</span>
@@ -1023,14 +1051,13 @@
         <p class="section-label">Task / Reason</p>
         <label for="taskInputSettings">Enter Task / Reason to Call</label>
         <input type="text" id="taskInputSettings" placeholder="e.g. Facebook lead, callback request…" autocomplete="off">
-        <p class="field-hint">Shows in the result popup so everyone knows why that person was picked. Set it here before you spin.</p>
-        <p class="field-hint" style="margin-top:0.65rem">Quick presets — tap to set task:</p>
+        <p class="field-hint">Appears in the result popup and on the home screen pill — e.g. “Peter chosen for Facebook lead”. Leave blank to say “this lead”.</p>
+        <p class="field-hint" style="margin-top:0.75rem;font-weight:600;color:var(--text)">Quick presets <span style="font-weight:400;color:var(--muted)">— tap to apply · × to remove</span></p>
         <div class="preset-list" id="presetList"></div>
         <div class="preset-manage">
-          <input type="text" id="newPresetInput" placeholder="Add preset…" maxlength="40" autocomplete="off">
+          <input type="text" id="newPresetInput" placeholder="Add new preset…" maxlength="40" autocomplete="off">
           <button type="button" id="addPresetBtn">Add</button>
         </div>
-        <div class="preset-tags" id="presetTags"></div>
       </div>
 
       <div class="settings-section">
@@ -1046,12 +1073,13 @@
           <option value="strictBalance">Strict Balance — always picks minimum wins</option>
         </select>
         <p class="mode-hint" id="modeHint"></p>
-        <button type="button" class="help-link" id="helpLinkModes">Read full guide →</button>
+        <button type="button" class="help-link" id="helpLinkModes">Read full guide to all modes →</button>
       </div>
 
       <div class="settings-section">
         <p class="section-label">Animation</p>
         <label>Spin Speed</label>
+        <p class="field-hint" style="margin-bottom:0.5rem">Only changes how long the wheel spins — not who wins.</p>
         <div class="segmented" id="speedButtons">
           <button type="button" data-speed="quick">Quick</button>
           <button type="button" data-speed="normal" class="active">Normal</button>
@@ -1062,13 +1090,14 @@
       <div class="settings-section">
         <p class="section-label">Team</p>
         <label>People on the wheel</label>
-        <p class="field-hint" style="margin-bottom:0.65rem">Minimum 2, maximum 12. Saved to this browser.</p>
+        <p class="field-hint" style="margin-bottom:0.65rem">2–12 names · saved on this device. Check “Exclude” to skip someone temporarily (e.g. on break).</p>
         <div class="name-list" id="nameList"></div>
         <button type="button" class="btn-add-name" id="addNameBtn">+ Add Person</button>
       </div>
 
       <div class="settings-section">
         <p class="section-label">Preferences</p>
+        <p class="field-hint" style="margin-bottom:0.65rem">Sounds, confetti, and theme — spin works the same either way.</p>
         <div class="setting-row" style="border-top:none;margin-top:0;padding-top:0">
           <label for="soundToggle">Spin sounds</label>
           <label class="toggle">
@@ -1110,13 +1139,13 @@
         </div>
         <label for="dailyResetTime" style="margin-top:0.75rem">Reset time (shift start)</label>
         <input type="time" id="dailyResetTime" value="09:00">
-        <p class="field-hint">Counts reset at this time each day. Set to 00:00 for midnight.</p>
+        <p class="field-hint">Scoreboard zeros out at this time. Use 09:00 for shift start, or 00:00 for midnight. History is kept.</p>
       </div>
 
       <div class="settings-section">
         <p class="section-label">PIN Lock</p>
         <div class="setting-row" style="border-top:none;margin-top:0;padding-top:0">
-          <label for="pinToggle">Require PIN for mode/speed changes</label>
+          <label for="pinToggle">Require PIN to change mode or speed</label>
           <label class="toggle">
             <input type="checkbox" id="pinToggle">
             <span class="toggle-slider"></span>
@@ -1127,19 +1156,19 @@
           <input type="password" id="pinInput" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" autocomplete="off">
           <button type="button" id="savePinBtn">Save PIN</button>
         </div>
-        <p class="field-hint">PIN is stored only on this browser — not on a server. Unlock once per session to change mode/speed. <strong style="color:var(--text)">Forgot PIN?</strong> You can set a new one below anytime (no old PIN needed), or use Reset PIN.</p>
+        <p class="field-hint">Stored only on this browser — no server, no recovery email. Spinning always works without PIN. Unlock once per session to change mode/speed. <strong style="color:var(--text)">Forgot PIN?</strong> Set a new one below (no old PIN needed) or tap Reset.</p>
         <button type="button" class="help-link" id="resetPinBtn" style="margin-top:0.5rem">Reset PIN lock (forgot PIN)</button>
       </div>
 
       <div class="settings-section">
-        <p class="section-label">Export</p>
+        <p class="section-label">Export & Share</p>
         <div class="export-row">
           <button type="button" id="copyTeamLinkBtn">Copy Team Link</button>
           <button type="button" id="exportHistoryBtn">Export History CSV</button>
           <button type="button" id="exportTallyBtn">Export Tally CSV</button>
           <button type="button" id="copySummaryBtn">Copy Summary Text</button>
         </div>
-        <p class="field-hint">Team link shares names, mode, speed & task via URL — send to teammates to open the same setup.</p>
+        <p class="field-hint"><strong style="color:var(--text)">Team link</strong> — share URL with names, mode, speed & task preset. <strong style="color:var(--text)">CSV</strong> — for records. <strong style="color:var(--text)">Summary</strong> — paste into Slack/WhatsApp.</p>
       </div>
 
       <p class="settings-error" id="settingsError"></p>
@@ -1153,45 +1182,42 @@
   <div class="modal-overlay" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="modal modal-wide">
       <p class="modal-title-left" id="helpTitle">📖 How It Works</p>
-      <p class="modal-sub">Everything you need to know about assigning ads and leads fairly.</p>
+      <p class="modal-sub">Complete guide for assigning ads and leads fairly with your team.</p>
 
       <div class="help-section">
-        <span class="help-tag">Task field</span>
-        <h3>Enter Task / Reason to Call</h3>
-        <p>Before you spin, type a short note about this lead — e.g. “Facebook ad lead” or “Missed call callback”. When the wheel stops, the result popup says <strong style="color:var(--text)">“[Name] has been chosen for [your task]!”</strong> so the whole team sees who got it and why. Leave it blank and it will say “this lead” instead.</p>
+        <span class="help-tag">Quick start</span>
+        <h3>Home screen</h3>
+        <ul>
+          <li><strong style="color:var(--text)">SPIN</strong> or <strong style="color:var(--text)">Space</strong> — pick someone when a lead comes in.</li>
+          <li><strong style="color:var(--text)">Pills</strong> — show mode, speed, current task, and round progress (Fair Bag).</li>
+          <li><strong style="color:var(--text)">?</strong> — this guide · <strong style="color:var(--text)">🕐</strong> — spin history · <strong style="color:var(--text)">⚙</strong> — all settings.</li>
+          <li><strong style="color:var(--text)">🔒</strong> — mode/speed locked until PIN entered (Settings → PIN Lock).</li>
+          <li><strong style="color:var(--text)">Scoreboard</strong> — session win counts under the wheel.</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">Task</span>
+        <h3>Task / Reason to Call</h3>
+        <p>Set in ⚙ Settings before you spin. Example: “Facebook lead”. Result says <strong style="color:var(--text)">“Peter has been chosen for Facebook lead!”</strong> Use <strong style="color:var(--text)">Copy Result</strong> to paste in chat. Quick presets (Facebook lead, Callback, etc.) — tap to apply.</p>
       </div>
 
       <div class="help-section">
         <span class="help-tag">Recommended</span>
         <h3>Fair Bag — equal share, surprise order</h3>
-        <p>Think of four cards in a bag. The app shuffles them, then draws one name per spin without putting it back.</p>
+        <p>Shuffled deck — everyone gets exactly 1 per round, then a new shuffle. Best for equal ads while looking random.</p>
         <ul>
-          <li>After one full round, each person gets <strong style="color:var(--text)">exactly 1</strong> lead.</li>
-          <li>Then it shuffles a new bag — order is different every round.</li>
-          <li>Not a fixed loop — nobody can predict the whole list from spin 1.</li>
-          <li>Best for: equal ads while looking like the wheel decided.</li>
+          <li>Not a fixed loop — order changes every round.</li>
+          <li>Round pill shows e.g. “Round 1 · 2/4”.</li>
         </ul>
       </div>
 
       <div class="help-section">
-        <span class="help-tag">Luck mode</span>
-        <h3>Pure Random — fresh coin flip every spin</h3>
-        <p>Each click is independent. Everyone has the same % chance every time, even if they just won.</p>
+        <span class="help-tag">Core modes</span>
+        <h3>Pure Random & Weighted</h3>
         <ul>
-          <li>Same person can win twice in a row.</li>
-          <li>Over a short stretch, counts may look uneven.</li>
-          <li>Best for: maximum “it was luck” with no rules.</li>
-        </ul>
-      </div>
-
-      <div class="help-section">
-        <span class="help-tag">Soft balance</span>
-        <h3>Weighted — catch-up for whoever is behind</h3>
-        <p>Still random, but the app remembers session win counts. People with fewer wins get a higher chance next spin; people ahead get lower chance but can still win.</p>
-        <ul>
-          <li>Not a strict 1-each cycle — a soft balancer so nobody stays at zero.</li>
-          <li>Check the scoreboard under the wheel to see counts.</li>
-          <li>Best for: random feel without starving one agent.</li>
+          <li><strong style="color:var(--text)">Pure Random</strong> — fresh % chance every spin; repeats allowed.</li>
+          <li><strong style="color:var(--text)">Weighted</strong> — fewer wins = higher chance next spin; soft catch-up.</li>
         </ul>
       </div>
 
@@ -1199,40 +1225,62 @@
         <span class="help-tag">Extra modes</span>
         <h3>More fairness options</h3>
         <ul>
-          <li><strong style="color:var(--text)">Anti-Repeat</strong> — same person cannot win twice in a row.</li>
-          <li><strong style="color:var(--text)">Last Excluded</strong> — previous winner is skipped on the next spin.</li>
-          <li><strong style="color:var(--text)">Lowest First</strong> — random pick among people tied for fewest wins.</li>
-          <li><strong style="color:var(--text)">Strict Balance</strong> — always picks someone with the minimum win count (random if tied).</li>
+          <li><strong style="color:var(--text)">Anti-Repeat</strong> — cannot win twice in a row.</li>
+          <li><strong style="color:var(--text)">Last Excluded</strong> — previous winner skipped next spin.</li>
+          <li><strong style="color:var(--text)">Lowest First</strong> — random among tied lowest counts.</li>
+          <li><strong style="color:var(--text)">Strict Balance</strong> — always minimum win count (random if tied).</li>
         </ul>
-        <p>Use the mode dropdown in Settings. You can also temporarily exclude someone from spins in Team settings.</p>
-      </div>
-
-      <div class="help-section">
-        <span class="help-tag">History & export</span>
-        <h3>History, presets & export</h3>
-        <ul>
-          <li>Tap 🕐 on the home screen for spin history (filter, search, export).</li>
-          <li>Task presets in Settings — tap to set the task quickly.</li>
-          <li>Export History or Tally as CSV, or copy a text summary.</li>
-          <li>Press <strong style="color:var(--text)">Space</strong> to spin when not typing.</li>
-        </ul>
+        <p>Exclude someone temporarily in Team settings (e.g. on break).</p>
       </div>
 
       <div class="help-section">
         <span class="help-tag">Speed</span>
         <h3>Spin Speed</h3>
         <ul>
-          <li><strong style="color:var(--text)">Quick</strong> (~1 sec) — busy moment, lead just came in.</li>
-          <li><strong style="color:var(--text)">Normal</strong> (~3.5 sec) — good show for the team.</li>
-          <li><strong style="color:var(--text)">Dramatic</strong> (~5.5 sec) — slow settle, extra fair look.</li>
+          <li><strong style="color:var(--text)">Quick</strong> (~1 s) — lead just came in.</li>
+          <li><strong style="color:var(--text)">Normal</strong> (~3.5 s) — good for the team.</li>
+          <li><strong style="color:var(--text)">Dramatic</strong> (~5.5 s) — slow, fair-looking settle.</li>
         </ul>
-        <p>Speed only changes animation — it does not change who wins.</p>
       </div>
 
       <div class="help-section">
-        <span class="help-tag">Scoreboard</span>
-        <h3>Session tally</h3>
-        <p>The numbers under the wheel show how many times each person has won this session (until you refresh or reset counts in Settings).</p>
+        <span class="help-tag">History</span>
+        <h3>Spin History (🕐)</h3>
+        <p>Last 500 spins saved on this device. Search, filter by person or mode, export CSV, or clear. Counts reset separately from history.</p>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">Export</span>
+        <h3>Share & records</h3>
+        <ul>
+          <li><strong style="color:var(--text)">Copy Team Link</strong> — URL with names, mode, speed, task.</li>
+          <li><strong style="color:var(--text)">Export History / Tally CSV</strong> — spreadsheets.</li>
+          <li><strong style="color:var(--text)">Copy Summary</strong> — quick text for Slack/WhatsApp.</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">PIN</span>
+        <h3>PIN Lock</h3>
+        <p>Stops mode/speed changes until PIN entered once per session. Spinning always works. PIN is local only — forgot it? Settings → set new PIN or Reset PIN lock.</p>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">Daily</span>
+        <h3>Auto-reset counts</h3>
+        <p>Settings → Daily Reset. Zeros scoreboard at chosen time (e.g. 09:00 shift start). History kept.</p>
+      </div>
+
+      <div class="help-section">
+        <span class="help-tag">Extras</span>
+        <h3>Preferences</h3>
+        <ul>
+          <li><strong style="color:var(--text)">Sounds</strong> — tick + win chime.</li>
+          <li><strong style="color:var(--text)">Confetti</strong> — celebration on win.</li>
+          <li><strong style="color:var(--text)">Quick result</strong> — auto-close popup after 2 s.</li>
+          <li><strong style="color:var(--text)">Dark / Light</strong> theme.</li>
+          <li><strong style="color:var(--text)">Install app</strong> — browser menu → Add to Home Screen (works offline).</li>
+        </ul>
       </div>
 
       <div class="modal-actions">
@@ -1247,9 +1295,10 @@
         <button type="button" class="back-btn" id="historyBack">← Back</button>
         <h2>Spin History</h2>
       </div>
+      <p class="field-hint" style="margin-bottom:1rem">Last 500 spins on this device · filter, search, or export CSV for records.</p>
 
       <div class="history-filters">
-        <input type="search" id="historySearch" placeholder="Search winner or task…" autocomplete="off">
+        <input type="search" id="historySearch" placeholder="Search by name or task…" autocomplete="off">
         <div class="filter-row">
           <select id="historyFilterPerson">
             <option value="">All people</option>
@@ -1274,7 +1323,7 @@
     <div class="modal">
       <div class="modal-icon">🔒</div>
       <p class="modal-title" id="pinModalTitle">Enter PIN</p>
-      <p class="modal-sub">Unlock to change assignment mode or spin speed. Forgot PIN? Open Settings → set a new PIN, or tap Reset PIN lock.</p>
+      <p class="modal-sub">Unlock to change mode or speed. Spinning works without PIN. Forgot it? Settings → new PIN or Reset PIN lock.</p>
       <div class="pin-dots" id="pinDots">
         <span class="pin-dot"></span>
         <span class="pin-dot"></span>
@@ -1378,7 +1427,6 @@
     const historyFilterPerson = document.getElementById('historyFilterPerson');
     const historyFilterMode = document.getElementById('historyFilterMode');
     const presetList = document.getElementById('presetList');
-    const presetTags = document.getElementById('presetTags');
     const pinModal = document.getElementById('pinModal');
     const pinToggle = document.getElementById('pinToggle');
     const dailyResetToggle = document.getElementById('dailyResetToggle');
@@ -1643,13 +1691,13 @@
       const n = getEligibleNames().length || names.length;
       const pct = Math.round(100 / Math.max(n, 1));
       return {
-        fairBag: `Shuffled deck — everyone gets exactly 1 per round of ${n}.`,
-        pureRandom: `Fresh ${pct}% chance every spin — repeats allowed.`,
-        weighted: 'Catch-up mode — fewer wins means higher chance next spin.',
-        antiRepeat: 'Same person cannot win twice in a row.',
-        lastExcluded: 'Previous winner is excluded on the next spin.',
-        lowestFirst: 'Random pick among people tied for fewest session wins.',
-        strictBalance: 'Always picks someone with the minimum win count.'
+        fairBag: `Recommended — shuffled deck, everyone gets exactly 1 per round of ${n}.`,
+        pureRandom: `Fresh ${pct}% chance every spin — no memory, repeats OK.`,
+        weighted: 'Soft catch-up — fewer session wins = higher chance next spin.',
+        antiRepeat: 'No back-to-back wins — same person cannot win twice in a row.',
+        lastExcluded: 'Previous winner sits out the next spin only.',
+        lowestFirst: 'Random among people tied for the fewest session wins.',
+        strictBalance: 'Always picks minimum win count — random if several are tied.'
       }[state.mode];
     }
 
@@ -2052,11 +2100,11 @@
     }
 
     function renderPresets() {
-      presetList.innerHTML = state.taskPresets.map(p => `
-        <button type="button" class="preset-chip" data-preset="${escapeHtml(p)}">${escapeHtml(p)}</button>
-      `).join('');
-      presetTags.innerHTML = state.taskPresets.map((p, i) => `
-        <span class="preset-tag">${escapeHtml(p)}<button type="button" data-remove-preset="${i}" title="Remove">×</button></span>
+      presetList.innerHTML = state.taskPresets.map((p, i) => `
+        <span class="preset-chip-wrap">
+          <button type="button" class="preset-chip" data-preset="${escapeHtml(p)}" title="Tap to set task">${escapeHtml(p)}</button>
+          <button type="button" class="preset-chip-remove" data-remove-preset="${i}" title="Remove preset" aria-label="Remove ${escapeHtml(p)}">×</button>
+        </span>
       `).join('');
     }
 
@@ -2457,19 +2505,18 @@
     });
 
     presetList.addEventListener('click', (e) => {
+      const removeBtn = e.target.closest('[data-remove-preset]');
+      if (removeBtn) {
+        e.stopPropagation();
+        state.taskPresets.splice(Number(removeBtn.dataset.removePreset), 1);
+        renderPresets();
+        savePrefs();
+        return;
+      }
       const chip = e.target.closest('[data-preset]');
       if (!chip) return;
       taskInputSettings.value = chip.dataset.preset;
       updateStatusBar();
-      savePrefs();
-    });
-
-    presetTags.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-remove-preset]');
-      if (!btn) return;
-      const idx = Number(btn.dataset.removePreset);
-      state.taskPresets.splice(idx, 1);
-      renderPresets();
       savePrefs();
     });
 
