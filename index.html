@@ -328,6 +328,105 @@
       .modal-overlay, .settings-page, .home-toast { transition: none !important; }
     }
 
+    .recent-tasks, .fairbag-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      justify-content: center;
+      margin-bottom: 0.65rem;
+    }
+
+    .recent-task-chip, .remaining-chip {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.28rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .recent-task-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    .remaining-chip { cursor: default; color: var(--text); }
+    .remaining-chip.next { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,0.12); }
+
+    .fairbag-label {
+      width: 100%;
+      text-align: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.15rem;
+    }
+
+    .home-actions {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .home-actions button {
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--btn-bg);
+      color: var(--text);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .home-actions button:hover { border-color: var(--accent); color: var(--accent); }
+
+    .volume-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-top: 0.5rem;
+      padding: 0.5rem 0;
+    }
+
+    .volume-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+    .volume-row span { font-size: 0.75rem; color: var(--muted); min-width: 2rem; text-align: right; }
+
+    .history-chart { margin-bottom: 1rem; }
+    .chart-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+      font-size: 0.75rem;
+    }
+    .chart-bar-label { width: 4.5rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; color: var(--text); font-weight: 600; }
+    .chart-bar-track { flex: 1; height: 10px; background: var(--input-bg); border-radius: 5px; overflow: hidden; }
+    .chart-bar-fill { height: 100%; background: var(--accent); border-radius: 5px; transition: width 0.3s; }
+    .chart-bar-val { width: 1.5rem; text-align: right; color: var(--muted); font-size: 0.7rem; }
+
+    .wizard-options { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+    .wizard-opt {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+    }
+    .wizard-opt:hover { border-color: var(--accent); color: var(--accent); }
+
+    @media (max-width: 480px) {
+      .spin-btn { width: 96px; height: 96px; font-size: 1.05rem; }
+    }
+
     .field-group { margin-bottom: 1.25rem; }
 
     label {
@@ -1177,7 +1276,7 @@
 
     .filter-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 0.5rem;
     }
 
@@ -1264,6 +1363,11 @@
       <span class="status-pill" id="statusRound"></span>
     </div>
 
+    <div class="fairbag-panel" id="fairBagPanel" style="display:none">
+      <span class="fairbag-label">Still this round</span>
+    </div>
+    <div class="recent-tasks" id="recentTasks"></div>
+
     <p class="last-result" id="lastResultStrip" aria-live="polite"></p>
     <div id="ariaLive" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 
@@ -1276,6 +1380,10 @@
     </div>
 
     <div class="tally" id="tally"></div>
+    <div class="home-actions">
+      <button type="button" id="copyDaySummaryBtn">📋 Today's summary</button>
+      <button type="button" id="modeWizardBtn">❓ Which mode?</button>
+    </div>
   </div>
 
   <div class="modal-overlay" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="modalWinner">
@@ -1288,6 +1396,7 @@
       <div class="modal-actions">
         <button type="button" class="btn-close" id="modalCopy">Copy Result</button>
         <button type="button" class="btn-close" id="modalCopySlack">Copy for Slack</button>
+        <button type="button" class="btn-close" id="modalShare">Share</button>
         <button type="button" class="btn-close" id="modalUndo">Undo Spin</button>
         <button type="button" class="btn-close" id="modalClose">Close</button>
         <button type="button" class="btn-primary" id="modalAgain">Spin Again</button>
@@ -1351,6 +1460,7 @@
         </div>
         <p class="mode-hint" id="modeHint"></p>
         <button type="button" class="help-link" id="helpLinkModes">Read full guide to all modes →</button>
+        <button type="button" class="help-link" id="modeWizardLink" style="margin-left:0.75rem">Help me choose a mode →</button>
       </div>
 
       <div class="settings-section" id="animationSection">
@@ -1380,6 +1490,18 @@
           <label for="soundToggle">Spin sounds</label>
           <label class="toggle">
             <input type="checkbox" id="soundToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="volume-row" id="volumeRow">
+          <label for="soundVolume" style="margin:0;text-transform:none;font-size:0.78rem">Volume</label>
+          <input type="range" id="soundVolume" min="0" max="100" value="80">
+          <span id="volumeLabel">80%</span>
+        </div>
+        <div class="setting-row">
+          <label for="requireTaskToggle">Require task before spin</label>
+          <label class="toggle">
+            <input type="checkbox" id="requireTaskToggle">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -1430,6 +1552,13 @@
             <span class="toggle-slider"></span>
           </label>
         </div>
+        <div class="setting-row">
+          <label for="pinLockResetToggle">Also require PIN for Reset Counts</label>
+          <label class="toggle">
+            <input type="checkbox" id="pinLockResetToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
         <label for="pinInput" style="margin-top:0.75rem">Set 4-digit PIN</label>
         <div class="pin-setup">
           <input type="password" id="pinInput" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" autocomplete="off">
@@ -1446,6 +1575,7 @@
           <button type="button" id="exportHistoryBtn">Export History CSV</button>
           <button type="button" id="exportTallyBtn">Export Tally CSV</button>
           <button type="button" id="copySummaryBtn">Copy Summary Text</button>
+          <button type="button" id="copyWeeklyReportBtn">Copy Weekly Report</button>
           <button type="button" id="exportBackupBtn">Export Full Backup</button>
           <button type="button" id="importBackupBtn">Import Backup</button>
         </div>
@@ -1594,6 +1724,7 @@
       <p class="field-hint" style="margin-bottom:1rem">Last 500 spins on this device · filter, search, or export CSV for records.</p>
 
       <div class="history-stats" id="historyStats"></div>
+      <div class="history-chart" id="historyChart"></div>
 
       <div class="history-filters">
         <input type="search" id="historySearch" placeholder="Search by name or task…" autocomplete="off">
@@ -1609,6 +1740,9 @@
           <select id="historyFilterMode">
             <option value="">All modes</option>
           </select>
+          <select id="historyFilterTask">
+            <option value="">All tasks</option>
+          </select>
         </div>
       </div>
 
@@ -1617,7 +1751,7 @@
 
       <div class="modal-actions" style="justify-content:stretch">
         <button type="button" class="btn-danger" id="clearHistoryBtn">Clear History</button>
-        <button type="button" class="btn-primary" id="exportHistoryBtn2" style="flex:1">Export CSV</button>
+        <button type="button" class="btn-primary" id="exportHistoryBtn2" style="flex:1">Export filtered CSV</button>
       </div>
     </div>
   </div>
@@ -1655,9 +1789,20 @@
 
   <div class="home-toast" id="homeToast" role="status"></div>
 
+  <div class="modal-overlay" id="modeWizardModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <p class="modal-title">Which mode fits you?</p>
+      <p class="modal-sub" id="wizardSub">Pick what matters most — you can change anytime in Settings.</p>
+      <div class="wizard-options" id="wizardOptions"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-close" id="wizardClose">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const STORAGE_KEY = 'fairAdsSpinner_v5';
-    const APP_VERSION = 5;
+    const APP_VERSION = 6;
     const VALID_MODES = ['fairBag', 'pureRandom', 'weighted', 'antiRepeat', 'lastExcluded', 'lowestFirst', 'strictBalance'];
     const MODE_LABELS = {
       fairBag: 'Fair Bag',
@@ -1718,7 +1863,10 @@
       dailyResetTime: '09:00',
       lastDailyReset: null,
       tourSeen: false,
-      installBannerDismissed: false
+      installBannerDismissed: false,
+      soundVolume: 0.8,
+      requireTaskBeforeSpin: false,
+      pinLockResetCounts: false
     };
 
     let settingsDraft = [];
@@ -1798,7 +1946,7 @@
         osc.frequency.setValueAtTime(920, t);
         osc.frequency.exponentialRampToValueAtTime(480, t + 0.04);
         gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.exponentialRampToValueAtTime(0.22, t + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.22 * state.soundVolume, t + 0.004);
         gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
@@ -1822,7 +1970,7 @@
         filter.Q.value = 0.8;
         const gain = this.ctx.createGain();
         gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.12 * state.soundVolume, t + 0.02);
         gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
         src.connect(filter);
         filter.connect(gain);
@@ -1840,7 +1988,7 @@
           osc.frequency.value = freq;
           const start = t + i * 0.09;
           gain.gain.setValueAtTime(0.0001, start);
-          gain.gain.exponentialRampToValueAtTime(0.18, start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.18 * state.soundVolume, start + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.28);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
@@ -2118,6 +2266,170 @@
       document.getElementById('ariaLive').textContent = `${winner} chosen for ${label}`;
     }
 
+    function getRecentTasks() {
+      const seen = new Set();
+      const out = [];
+      for (const e of state.history) {
+        const t = (e.task || '').trim();
+        if (t && !seen.has(t.toLowerCase())) {
+          seen.add(t.toLowerCase());
+          out.push(t);
+          if (out.length >= 3) break;
+        }
+      }
+      return out;
+    }
+
+    function renderRecentTasks() {
+      const el = document.getElementById('recentTasks');
+      const recent = getRecentTasks();
+      if (!recent.length) { el.innerHTML = ''; return; }
+      el.innerHTML = recent.map(t =>
+        `<button type="button" class="recent-task-chip" data-recent-task="${escapeHtml(t)}">${escapeHtml(t)}</button>`
+      ).join('');
+    }
+
+    function renderFairBagPanel() {
+      const panel = document.getElementById('fairBagPanel');
+      if (state.mode !== 'fairBag') {
+        panel.style.display = 'none';
+        return;
+      }
+      const remaining = state.fairBagDeck.filter(n => getEligibleNames().includes(n));
+      if (!remaining.length) {
+        panel.style.display = 'none';
+        return;
+      }
+      panel.style.display = 'flex';
+      const next = remaining[0];
+      panel.innerHTML = `<span class="fairbag-label">Still this round · next up: ${escapeHtml(next)}</span>` +
+        remaining.map(n =>
+          `<span class="remaining-chip${n === next ? ' next' : ''}">${escapeHtml(n)}</span>`
+        ).join('');
+    }
+
+    function getTodayHistory() {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      return state.history.filter(e => e.timestamp >= start.getTime());
+    }
+
+    function buildDaySummary() {
+      const today = getTodayHistory();
+      const dateStr = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+      const lines = [`📊 Fair Ads Spinner — ${dateStr}`, ''];
+      lines.push(`Mode: ${MODE_LABELS[state.mode]} · Team: ${names.join(', ')}`);
+      lines.push('', 'Today\'s tally:');
+      const counts = {};
+      today.forEach(e => { counts[e.winner] = (counts[e.winner] || 0) + 1; });
+      names.forEach(n => lines.push(`  ${n}: ${counts[n] || 0} lead${counts[n] === 1 ? '' : 's'}`));
+      lines.push('', `Total spins today: ${today.length}`);
+      if (today.length) {
+        lines.push('', 'Log:');
+        today.slice(0, 15).forEach(e => {
+          const t = e.task || 'this lead';
+          const time = new Date(e.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+          lines.push(`  ${time} — ${e.winner} (${t})`);
+        });
+        if (today.length > 15) lines.push(`  … +${today.length - 15} more`);
+      }
+      return lines.join('\n');
+    }
+
+    function buildWeeklyReport() {
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+      startOfWeek.setHours(0, 0, 0, 0);
+      const week = state.history.filter(e => e.timestamp >= startOfWeek.getTime());
+      const lines = ['📈 Weekly Lead Report — Fair Ads Spinner', ''];
+      lines.push(`Week of ${startOfWeek.toLocaleDateString()} · Mode: ${MODE_LABELS[state.mode]}`);
+      lines.push('', 'Assignments this week:');
+      const counts = {};
+      week.forEach(e => { counts[e.winner] = (counts[e.winner] || 0) + 1; });
+      names.forEach(n => lines.push(`  ${n}: ${counts[n] || 0}`));
+      const byTask = {};
+      week.forEach(e => {
+        const t = e.task || '(no task)';
+        byTask[t] = (byTask[t] || 0) + 1;
+      });
+      lines.push('', 'By task type:');
+      Object.entries(byTask).sort((a, b) => b[1] - a[1]).forEach(([t, c]) => lines.push(`  ${t}: ${c}`));
+      lines.push('', `Total: ${week.length} spins`);
+      return lines.join('\n');
+    }
+
+    async function copyDaySummary() {
+      try {
+        await navigator.clipboard.writeText(buildDaySummary());
+        showHomeToast('Today\'s summary copied!');
+      } catch (_) { showHomeToast('Could not copy.'); }
+    }
+
+    async function copyWeeklyReport() {
+      try {
+        await navigator.clipboard.writeText(buildWeeklyReport());
+        showSettingsToast('Weekly report copied!');
+      } catch (_) { settingsError.textContent = 'Could not copy report.'; }
+    }
+
+    async function shareResult() {
+      const text = lastResultText;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: 'Lead assignment', text });
+          return;
+        } catch (_) { /* fall through */ }
+      }
+      const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(wa, '_blank', 'noopener');
+    }
+
+    const WIZARD_OPTIONS = [
+      { label: '⚖️ Equal ads for everyone', sub: 'Shuffled deck — Fair Bag', mode: 'fairBag' },
+      { label: '🎲 Pure luck — coin flip', sub: 'No balance rules — Pure Random', mode: 'pureRandom' },
+      { label: '📈 Catch-up for whoever is behind', sub: 'Weighted mode', mode: 'weighted' },
+      { label: '🚫 No back-to-back wins', sub: 'Anti-Repeat', mode: 'antiRepeat' },
+      { label: '⚙️ Browse all modes in Settings', sub: '', action: 'settings' }
+    ];
+
+    function openModeWizard() {
+      if (state.isSpinning) return;
+      const opts = document.getElementById('wizardOptions');
+      opts.innerHTML = WIZARD_OPTIONS.map((o, i) =>
+        `<button type="button" class="wizard-opt" data-wizard-idx="${i}">${o.label}${o.sub ? `<br><span style="font-weight:400;font-size:0.78rem;color:var(--muted)">${o.sub}</span>` : ''}</button>`
+      ).join('');
+      document.getElementById('modeWizardModal').classList.add('show');
+    }
+
+    function closeModeWizard() {
+      document.getElementById('modeWizardModal').classList.remove('show');
+    }
+
+    function applyWizardChoice(idx) {
+      const opt = WIZARD_OPTIONS[idx];
+      closeModeWizard();
+      if (opt.action === 'settings') {
+        openSettings();
+        return;
+      }
+      const apply = () => {
+        state.mode = opt.mode;
+        syncModeButtons();
+        initFairBag();
+        updateStatusBar();
+        renderFairBagPanel();
+        savePrefs();
+        showHomeToast(`Mode set to ${MODE_LABELS[opt.mode]}`);
+      };
+      if (state.pinEnabled && !state.pinUnlocked) {
+        pendingPinAction = apply;
+        openPinModal();
+        return;
+      }
+      apply();
+    }
+
     function openHelp() {
       if (state.isSpinning) return;
       helpModal.classList.add('show');
@@ -2189,6 +2501,9 @@
           lastWinner: state.lastWinner,
           tourSeen: state.tourSeen,
           installBannerDismissed: state.installBannerDismissed,
+          soundVolume: state.soundVolume,
+          requireTaskBeforeSpin: state.requireTaskBeforeSpin,
+          pinLockResetCounts: state.pinLockResetCounts,
           appVersion: APP_VERSION
         }));
       } catch (_) { /* ignore */ }
@@ -2231,6 +2546,9 @@
         if (typeof data.lastWinner === 'string') state.lastWinner = data.lastWinner;
         if (typeof data.tourSeen === 'boolean') state.tourSeen = data.tourSeen;
         if (typeof data.installBannerDismissed === 'boolean') state.installBannerDismissed = data.installBannerDismissed;
+        if (typeof data.soundVolume === 'number') state.soundVolume = Math.min(1, Math.max(0, data.soundVolume));
+        if (typeof data.requireTaskBeforeSpin === 'boolean') state.requireTaskBeforeSpin = data.requireTaskBeforeSpin;
+        if (typeof data.pinLockResetCounts === 'boolean') state.pinLockResetCounts = data.pinLockResetCounts;
       } catch (_) { /* ignore */ }
       if (names.length < MIN_NAMES) names = [...DEFAULT_NAMES];
       if (!state.taskPresets.length) state.taskPresets = [...DEFAULT_PRESETS];
@@ -2463,6 +2781,8 @@
       } else {
         statusRound.style.display = 'none';
       }
+      renderFairBagPanel();
+      renderRecentTasks();
     }
 
     function setControlsDisabled(disabled) {
@@ -2503,6 +2823,10 @@
       const eligible = getEligibleNames();
       if (!eligible.length) {
         showHomeToast('Everyone is excluded — uncheck Exclude in Settings.');
+        return;
+      }
+      if (state.requireTaskBeforeSpin && !taskInputSettings.value.trim()) {
+        showHomeToast('Set a task first — tap task pill or ⚙ Settings.');
         return;
       }
 
@@ -2595,8 +2919,14 @@
       confettiToggle.checked = state.confettiEnabled;
       quickResultToggle.checked = state.quickResult;
       pinToggle.checked = state.pinEnabled;
+      document.getElementById('pinLockResetToggle').checked = state.pinLockResetCounts;
+      document.getElementById('requireTaskToggle').checked = state.requireTaskBeforeSpin;
       dailyResetToggle.checked = state.dailyResetEnabled;
       dailyResetTime.value = state.dailyResetTime || '09:00';
+      const vol = Math.round((state.soundVolume ?? 0.8) * 100);
+      document.getElementById('soundVolume').value = vol;
+      document.getElementById('volumeLabel').textContent = `${vol}%`;
+      document.getElementById('volumeRow').style.opacity = state.soundEnabled ? '1' : '0.45';
     }
 
     function getFilteredHistory() {
@@ -2604,12 +2934,14 @@
       const person = historyFilterPerson.value;
       const mode = historyFilterMode.value;
       const dateFilter = document.getElementById('historyFilterDate')?.value || '';
+      const taskFilter = document.getElementById('historyFilterTask')?.value || '';
       const now = new Date();
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
       const startOfWeek = startOfToday - ((now.getDay() + 6) % 7) * 86400000;
       return state.history.filter(entry => {
         if (person && entry.winner !== person) return false;
         if (mode && entry.mode !== mode) return false;
+        if (taskFilter && (entry.task || '') !== taskFilter) return false;
         if (dateFilter === 'today' && entry.timestamp < startOfToday) return false;
         if (dateFilter === 'week' && entry.timestamp < startOfWeek) return false;
         if (q) {
@@ -2655,16 +2987,37 @@
       showHomeToast('Last spin undone.');
     }
 
+    function renderHistoryChart() {
+      const el = document.getElementById('historyChart');
+      const filtered = getFilteredHistory();
+      const counts = {};
+      filtered.forEach(e => { counts[e.winner] = (counts[e.winner] || 0) + 1; });
+      const entries = names.map(n => [n, counts[n] || 0]).sort((a, b) => b[1] - a[1]);
+      const max = Math.max(1, ...entries.map(e => e[1]));
+      if (!filtered.length) { el.innerHTML = ''; return; }
+      el.innerHTML = entries.map(([name, count]) => `
+        <div class="chart-bar-row">
+          <span class="chart-bar-label">${escapeHtml(name)}</span>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(count / max * 100)}%"></div></div>
+          <span class="chart-bar-val">${count}</span>
+        </div>
+      `).join('');
+    }
+
     function renderHistoryFilters() {
       const people = [...new Set(state.history.map(h => h.winner))].sort();
       historyFilterPerson.innerHTML = '<option value="">All people</option>' +
         people.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
       historyFilterMode.innerHTML = '<option value="">All modes</option>' +
         VALID_MODES.map(m => `<option value="${m}">${escapeHtml(MODE_LABELS[m])}</option>`).join('');
+      const tasks = [...new Set(state.history.map(h => h.task || '').filter(Boolean))].sort();
+      document.getElementById('historyFilterTask').innerHTML = '<option value="">All tasks</option>' +
+        tasks.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
     }
 
     function renderHistoryList() {
       renderHistoryStats();
+      renderHistoryChart();
       const filtered = getFilteredHistory();
       const limit = historyShowAll ? filtered.length : HISTORY_DEFAULT_SHOW;
       const shown = filtered.slice(0, limit);
@@ -2701,6 +3054,7 @@
       historyShowAll = false;
       historySearch.value = '';
       document.getElementById('historyFilterDate').value = '';
+      document.getElementById('historyFilterTask').value = '';
       historyFilterPerson.value = '';
       historyFilterMode.value = '';
       renderHistoryFilters();
@@ -2738,12 +3092,14 @@
       URL.revokeObjectURL(url);
     }
 
-    function exportHistoryCSV() {
+    function exportHistoryCSV(useFilter = false) {
+      const entries = useFilter ? getFilteredHistory() : state.history;
       const rows = [['ID', 'Winner', 'Task', 'Mode', 'Speed', 'Timestamp']];
-      state.history.forEach(e => {
+      entries.forEach(e => {
         rows.push([e.id, e.winner, e.task, MODE_LABELS[e.mode] || e.mode, SPEED_LABELS[e.speed] || e.speed, new Date(e.timestamp).toISOString()]);
       });
-      downloadCSV('fair-ads-history.csv', rows);
+      const suffix = useFilter ? '-filtered' : '';
+      downloadCSV(`fair-ads-history${suffix}.csv`, rows);
     }
 
     function exportTallyCSV() {
@@ -2807,7 +3163,7 @@
       }
     }
 
-    function resetSessionCounts() {
+    function doResetSessionCounts() {
       if (!confirm('Reset all session win counts to zero? History is kept.')) return;
       names.forEach(n => { state.wins[n] = 0; });
       undoSnapshot = null;
@@ -2815,7 +3171,18 @@
       renderTally();
       updateStatusBar();
       updateLastResultStrip();
+      renderFairBagPanel();
+      savePrefs();
       showSettingsToast('Session counts reset.');
+    }
+
+    function resetSessionCounts() {
+      if (state.pinEnabled && state.pinLockResetCounts && !state.pinUnlocked) {
+        pendingPinAction = doResetSessionCounts;
+        openPinModal();
+        return;
+      }
+      doResetSessionCounts();
     }
 
     function checkDailyReset() {
@@ -3115,10 +3482,7 @@
       if (persistSettingsDraft()) closeSettings();
     });
 
-    document.getElementById('resetCountsBtn').addEventListener('click', () => {
-      resetSessionCounts();
-      savePrefs();
-    });
+    document.getElementById('resetCountsBtn').addEventListener('click', resetSessionCounts);
 
     document.getElementById('settingsBtn').addEventListener('click', openSettings);
     document.getElementById('settingsBack').addEventListener('click', () => closeSettings());
@@ -3126,6 +3490,17 @@
     document.getElementById('historyBack').addEventListener('click', closeHistory);
     document.getElementById('helpBtn').addEventListener('click', openHelp);
     document.getElementById('helpLinkModes').addEventListener('click', openHelp);
+    document.getElementById('modeWizardLink').addEventListener('click', openModeWizard);
+    document.getElementById('modeWizardBtn').addEventListener('click', openModeWizard);
+    document.getElementById('wizardClose').addEventListener('click', closeModeWizard);
+    document.getElementById('wizardOptions').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-wizard-idx]');
+      if (btn) applyWizardChoice(Number(btn.dataset.wizardIdx));
+    });
+    document.getElementById('modeWizardModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modeWizardModal')) closeModeWizard();
+    });
+    document.getElementById('copyDaySummaryBtn').addEventListener('click', copyDaySummary);
     document.getElementById('helpClose').addEventListener('click', closeHelp);
     lockBtn.addEventListener('click', () => {
       if (state.pinEnabled && !state.pinUnlocked) openPinModal();
@@ -3145,7 +3520,33 @@
 
     soundToggle.addEventListener('change', () => {
       state.soundEnabled = soundToggle.checked;
+      syncSettingsToggles();
       savePrefs();
+    });
+
+    document.getElementById('soundVolume').addEventListener('input', (e) => {
+      state.soundVolume = Number(e.target.value) / 100;
+      document.getElementById('volumeLabel').textContent = `${e.target.value}%`;
+      savePrefs();
+    });
+
+    document.getElementById('requireTaskToggle').addEventListener('change', () => {
+      state.requireTaskBeforeSpin = document.getElementById('requireTaskToggle').checked;
+      savePrefs();
+    });
+
+    document.getElementById('pinLockResetToggle').addEventListener('change', () => {
+      state.pinLockResetCounts = document.getElementById('pinLockResetToggle').checked;
+      savePrefs();
+    });
+
+    document.getElementById('recentTasks').addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-recent-task]');
+      if (!chip) return;
+      taskInputSettings.value = chip.dataset.recentTask;
+      updateStatusBar();
+      savePrefs();
+      showHomeToast(`Task: ${chip.dataset.recentTask}`);
     });
 
     confettiToggle.addEventListener('change', () => {
@@ -3237,9 +3638,10 @@
 
     document.getElementById('copyTeamLinkBtn').addEventListener('click', copyTeamLink);
     document.getElementById('exportHistoryBtn').addEventListener('click', exportHistoryCSV);
-    document.getElementById('exportHistoryBtn2').addEventListener('click', exportHistoryCSV);
+    document.getElementById('exportHistoryBtn2').addEventListener('click', () => exportHistoryCSV(true));
     document.getElementById('exportTallyBtn').addEventListener('click', exportTallyCSV);
     document.getElementById('copySummaryBtn').addEventListener('click', copySummaryText);
+    document.getElementById('copyWeeklyReportBtn').addEventListener('click', copyWeeklyReport);
     document.getElementById('exportBackupBtn').addEventListener('click', exportFullBackup);
     document.getElementById('importBackupBtn').addEventListener('click', () => document.getElementById('importBackupInput').click());
     document.getElementById('importBackupInput').addEventListener('change', (e) => {
@@ -3257,6 +3659,7 @@
     historyFilterPerson.addEventListener('change', () => { historyShowAll = false; renderHistoryList(); });
     historyFilterMode.addEventListener('change', () => { historyShowAll = false; renderHistoryList(); });
     document.getElementById('historyFilterDate').addEventListener('change', () => { historyShowAll = false; renderHistoryList(); });
+    document.getElementById('historyFilterTask').addEventListener('change', () => { historyShowAll = false; renderHistoryList(); });
 
     statusTask.addEventListener('click', () => {
       openSettings();
@@ -3323,6 +3726,7 @@
     document.getElementById('modalCopySlack').addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(lastSlackText); showHomeToast('Slack format copied!'); } catch (_) {}
     });
+    document.getElementById('modalShare').addEventListener('click', shareResult);
     document.getElementById('modalUndo').addEventListener('click', undoLastSpin);
     document.getElementById('modalClose').addEventListener('click', hideResultModal);
     document.getElementById('modalAgain').addEventListener('click', () => {
@@ -3358,13 +3762,15 @@
         if (settingsPage.classList.contains('open')) closeSettings();
         if (historyPage.classList.contains('open')) closeHistory();
         closeHelp();
+        closeModeWizard();
         return;
       }
       if (e.key === ' ' || e.code === 'Space') {
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
         if (settingsPage.classList.contains('open') || historyPage.classList.contains('open')) return;
-        if (helpModal.classList.contains('show') || pinModal.classList.contains('show')) return;
+        if (helpModal.classList.contains('show') || pinModal.classList.contains('show') ||
+            document.getElementById('modeWizardModal').classList.contains('show')) return;
         e.preventDefault();
         if (resultModal.classList.contains('show')) {
           hideResultModal();
@@ -3415,6 +3821,8 @@
     renderTally();
     updateStatusBar();
     updateLastResultStrip();
+    renderFairBagPanel();
+    renderRecentTasks();
     startDailyResetTimer();
     savePrefs();
 
