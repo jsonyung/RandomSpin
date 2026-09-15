@@ -793,11 +793,18 @@ export function fitFontSize(name, segDeg) {
   return len > 6 ? 8 : 10;
 }
 
+export function nameColor(name) {
+  const idx = names.indexOf(name);
+  return SEG_COLORS[(idx >= 0 ? idx : 0) % SEG_COLORS.length];
+}
+
 export function renderWheel() {
   const n = names.length;
   const seg = 360 / n;
-  const cx = 100, cy = 100, outerR = 98, innerR = 38;
+  const cx = 100, cy = 100, outerR = 96, innerR = 38;
   let svg = '';
+
+  svg += `<circle cx="${cx}" cy="${cy}" r="${outerR + 2}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>`;
 
   for (let i = 0; i < n; i++) {
     const start = i * seg;
@@ -805,19 +812,26 @@ export function renderWheel() {
     const excluded = !!state.excluded[names[i]];
     const color = excluded ? '#64748b' : SEG_COLORS[i % SEG_COLORS.length];
     const opacity = excluded ? ' opacity="0.45"' : '';
-    svg += `<path d="${describeArc(cx, cy, outerR, start, end)}" fill="${color}"${opacity} stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>`;
+    svg += `<path d="${describeArc(cx, cy, outerR, start, end)}" fill="${color}"${opacity} stroke="rgba(255,255,255,0.15)" stroke-width="0.6"/>`;
   }
 
-  const centerColor = getComputedStyle(document.body).getPropertyValue('--wheel-center').trim() || '#1e293b';
-  svg += `<circle cx="${cx}" cy="${cy}" r="${innerR}" fill="${centerColor}" stroke="rgba(128,128,128,0.25)" stroke-width="1"/>`;
+  for (let t = 0; t < 48; t++) {
+    const a = t * 7.5;
+    const inner = polarToCartesian(cx, cy, outerR - 5, a);
+    const outer = polarToCartesian(cx, cy, outerR - 0.5, a);
+    svg += `<line x1="${inner.x}" y1="${inner.y}" x2="${outer.x}" y2="${outer.y}" stroke="rgba(255,255,255,0.22)" stroke-width="0.8"/>`;
+  }
+
+  const centerColor = getComputedStyle(document.body).getPropertyValue('--wheel-center').trim() || '#120f1a';
+  svg += `<circle cx="${cx}" cy="${cy}" r="${innerR}" fill="${centerColor}" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>`;
 
   for (let i = 0; i < n; i++) {
     const mid = (i + 0.5) * seg;
-    const pos = polarToCartesian(cx, cy, 68, mid);
+    const pos = polarToCartesian(cx, cy, 66, mid);
     const fs = fitFontSize(names[i], seg);
     let rot = mid;
     if (mid > 90 && mid < 270) rot += 180;
-    svg += `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" transform="rotate(${rot}, ${pos.x}, ${pos.y})">${escapeHtml(names[i])}</text>`;
+    svg += `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" stroke="rgba(0,0,0,0.35)" stroke-width="2" paint-order="stroke" transform="rotate(${rot}, ${pos.x}, ${pos.y})">${escapeHtml(names[i])}</text>`;
   }
 
   el.wheelSvg.innerHTML = svg;
@@ -829,12 +843,19 @@ export function escapeHtml(str) {
 
 export function renderTally() {
   el.tallyEl.style.gridTemplateColumns = `repeat(${Math.min(names.length, 4)}, 1fr)`;
-  el.tallyEl.innerHTML = names.map((name, i) => `
-    <div class="tally-item">
+  const maxWins = Math.max(0, ...names.map((name) => state.wins[name] || 0));
+  el.tallyEl.innerHTML = names.map((name, i) => {
+    const color = SEG_COLORS[i % SEG_COLORS.length];
+    const count = state.wins[name] || 0;
+    const leader = maxWins > 0 && count === maxWins;
+    return `
+    <div class="tally-item${leader ? ' leader' : ''}">
+      <div class="tally-avatar" style="background:${color}">${escapeHtml(name.charAt(0).toUpperCase())}</div>
       <div class="tally-name">${escapeHtml(name)}</div>
-      <div class="tally-count" style="color:${SEG_COLORS[i % SEG_COLORS.length]}">${state.wins[name]}</div>
-    </div>
-  `).join('');
+      <div class="tally-count" style="color:${color}">${count}</div>
+      <div class="tally-crown" style="color:${color}">👑</div>
+    </div>`;
+  }).join('');
 }
 
 export function syncModeSpeedUI() {
@@ -844,15 +865,31 @@ export function syncModeSpeedUI() {
   });
 }
 
+const MODE_ICONS = {
+  fairBag: '🛍',
+  pureRandom: '🎲',
+  weighted: '⚖',
+  antiRepeat: '🔁',
+  lastExcluded: '⏭',
+  lowestFirst: '📉',
+  strictBalance: '⚖'
+};
+
 export function updateStatusBar() {
   const locked = state.pinEnabled && !state.pinUnlocked;
-  el.statusMode.textContent = locked ? `🔒 ${MODE_LABELS[state.mode]}` : (MODE_LABELS[state.mode] || state.mode);
+  const modeLabel = MODE_LABELS[state.mode] || state.mode;
+  const modeIcon = MODE_ICONS[state.mode] || '🎯';
+  if (locked) {
+    el.statusMode.textContent = `🔒 ${modeLabel}`;
+  } else {
+    el.statusMode.innerHTML = `<span class="pill-icon" aria-hidden="true">${modeIcon}</span>${modeLabel}<span class="pill-dot green" aria-hidden="true"></span>`;
+  }
   el.statusSpeed.textContent = locked ? `🔒 ${SPEED_LABELS[state.speed]}` : SPEED_LABELS[state.speed];
   el.statusMode.classList.toggle('locked', locked);
   el.statusSpeed.classList.toggle('locked', locked);
   const task = el.taskInputSettings.value.trim();
   if (task) {
-    el.statusTask.textContent = task;
+    el.statusTask.innerHTML = `<span class="pill-icon" aria-hidden="true">📋</span>${escapeHtml(task)}<span class="pill-dot purple" aria-hidden="true"></span>`;
     el.statusTask.title = task;
     el.statusTask.style.display = '';
   } else {
@@ -861,9 +898,11 @@ export function updateStatusBar() {
   if (state.mode === 'fairBag') {
     const eligible = getEligibleNames().length || names.length;
     const spin = state.fairBagSpinInRound === 0 ? 1 : state.fairBagSpinInRound;
-    el.statusRound.textContent = `Round ${state.fairBagRound} · ${spin}/${eligible}`;
-    el.statusRound.style.display = '';
+    el.wheelRoundBadge.innerHTML = `<span aria-hidden="true">↻</span> Round ${state.fairBagRound} · ${spin}/${eligible}`;
+    el.wheelRoundBadge.style.display = '';
+    el.statusRound.style.display = 'none';
   } else {
+    el.wheelRoundBadge.style.display = 'none';
     el.statusRound.style.display = 'none';
   }
   renderFairBagPanel();
@@ -885,9 +924,13 @@ export function showResultModal(winner, task) {
   const taskLabel = task.trim() || 'this lead';
   lastResultText = `${winner} has been chosen for ${taskLabel}!`;
   lastSlackText = `@${winner} — ${taskLabel} (via Fair Ads Spinner)`;
+  const color = nameColor(winner);
   el.modalWinner.textContent = winner;
-  el.modalMessage.textContent = lastResultText;
-  document.getElementById('modalMeta').textContent = `${MODE_LABELS[state.mode]} · ${SPEED_LABELS[state.speed]}`;
+  el.modalWinnerAvatar.textContent = winner.charAt(0).toUpperCase();
+  el.modalWinnerAvatar.style.background = color;
+  el.modalTask.textContent = taskLabel;
+  el.modalMessage.textContent = `${winner} has been chosen for ${taskLabel}`;
+  document.getElementById('modalMeta').innerHTML = `<span aria-hidden="true">ℹ</span> ${MODE_LABELS[state.mode]} · ${SPEED_LABELS[state.speed]} · New spin available immediately`;
   document.getElementById('modalUndo').style.display = undoSnapshot ? '' : 'none';
   el.resultModal.classList.add('show');
   announceWinner(winner, task);

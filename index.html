@@ -6,7 +6,7 @@
   <title>Fair Ads Spinner</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/main.css">
-  <meta name="theme-color" content="#6366f1">
+  <meta name="theme-color" content="#8b5cf6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ads Spinner">
@@ -17,14 +17,14 @@
     <div class="header-row">
       <button type="button" class="icon-btn lock-btn" id="lockBtn" title="Mode locked — enter PIN in Settings to unlock" aria-label="PIN locked" style="display:none">🔒</button>
       <div id="headerSpacer" aria-hidden="true"></div>
-      <h1>Fair Ads Spinner</h1>
+      <h1><span class="title-main">Fair Ads</span> <span class="title-accent">Spinner</span></h1>
       <div class="header-actions">
         <button type="button" class="icon-btn" id="helpBtn" title="How it works — full guide" aria-label="Open help guide">?</button>
         <button type="button" class="icon-btn" id="historyBtn" title="Spin history — last 500 picks" aria-label="Open spin history">🕐</button>
         <button type="button" class="icon-btn" id="settingsBtn" title="Settings — task, team, modes" aria-label="Open settings">⚙</button>
       </div>
     </div>
-    <p class="subtitle" id="homeSubtitle">Space = spin · Space again closes result &amp; re-spins</p>
+    <p class="subtitle" id="homeSubtitle">Spin fairly · Decide fairly <span class="subtitle-hint">· Space to spin</span></p>
 
     <div class="update-banner" id="updateBanner">New version available.<button type="button" id="updateRefreshBtn">Refresh</button></div>
     <div class="install-banner" id="installBanner">
@@ -34,10 +34,10 @@
     </div>
 
     <div class="status-bar" id="statusBar">
-      <span class="status-pill accent" id="statusMode">Fair Bag</span>
-      <span class="status-pill" id="statusSpeed">Normal</span>
-      <span class="status-pill task-pill" id="statusTask" style="display:none" role="button" tabindex="0" title="Tap to edit task in Settings"></span>
-      <span class="status-pill" id="statusRound"></span>
+      <span class="status-pill accent status-pill-lg" id="statusMode">Fair Bag</span>
+      <span class="status-pill status-pill-sm" id="statusSpeed">Normal</span>
+      <span class="status-pill task-pill status-pill-lg" id="statusTask" style="display:none" role="button" tabindex="0" title="Tap to edit task in Settings"></span>
+      <span class="status-pill status-pill-sm" id="statusRound"></span>
     </div>
 
     <div class="fairbag-panel" id="fairBagPanel" style="display:none">
@@ -48,36 +48,70 @@
     <p class="last-result" id="lastResultStrip" aria-live="polite"></p>
     <div id="ariaLive" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 
+    <div class="wheel-round-badge" id="wheelRoundBadge" style="display:none"></div>
+
     <div class="wheel-wrap">
+      <div class="wheel-glow" aria-hidden="true"></div>
       <div class="pointer" aria-hidden="true"></div>
       <div class="wheel-rotator" id="wheelRotator">
         <svg class="wheel-svg" id="wheelSvg" viewBox="0 0 200 200" aria-hidden="true"></svg>
       </div>
-      <button type="button" class="spin-btn" id="spinBtn">SPIN</button>
+      <button type="button" class="spin-btn" id="spinBtn" aria-label="Spin the wheel">
+        <span class="spin-btn-sparkle" aria-hidden="true">✦</span>
+        <span class="spin-btn-label">SPIN</span>
+        <span class="spin-btn-hint">Tap to spin</span>
+      </button>
     </div>
 
-    <div class="tally" id="tally"></div>
+    <div class="scoreboard">
+      <p class="scoreboard-label">🏆 Scoreboard</p>
+      <div class="tally" id="tally"></div>
+    </div>
+
     <div class="home-actions">
       <button type="button" id="copyDaySummaryBtn">📋 Today's summary</button>
       <button type="button" id="modeWizardBtn">❓ Which mode?</button>
     </div>
+
+    <p class="app-footer"><span aria-hidden="true">🔒</span> Fair play · Every spin</p>
   </div>
 
   <div class="modal-overlay" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="modalWinner">
-    <div class="modal">
-      <div class="modal-icon">🎯</div>
-      <p class="modal-title">Result</p>
-      <p class="modal-winner" id="modalWinner"></p>
-      <p class="modal-message" id="modalMessage"></p>
-      <p class="modal-meta" id="modalMeta"></p>
-      <div class="modal-actions">
-        <button type="button" class="btn-close" id="modalCopy">Copy Result</button>
-        <button type="button" class="btn-close" id="modalCopySlack">Copy for Slack</button>
-        <button type="button" class="btn-close" id="modalShare">Share</button>
-        <button type="button" class="btn-close" id="modalUndo">Undo Spin</button>
-        <button type="button" class="btn-close" id="modalClose">Close</button>
-        <button type="button" class="btn-primary" id="modalAgain">Spin Again</button>
+    <div class="modal modal-result">
+      <div class="modal-brand">
+        <img src="icon-192.png" alt="" width="22" height="22">
+        <span>Fair Ads Spinner</span>
       </div>
+      <p class="modal-heading">Result</p>
+      <p class="modal-message" id="modalMessage"></p>
+      <div class="winner-card" id="winnerCard">
+        <div class="winner-avatar" id="modalWinnerAvatar" aria-hidden="true"></div>
+        <div class="winner-info">
+          <p class="modal-winner" id="modalWinner"></p>
+          <p class="winner-task" id="modalTask"></p>
+        </div>
+      </div>
+      <p class="modal-meta" id="modalMeta"><span aria-hidden="true">ℹ</span> New spin available immediately</p>
+      <div class="modal-action-grid">
+        <button type="button" class="modal-action-btn" id="modalCopy">
+          <span class="action-icon" aria-hidden="true">📋</span>
+          <span class="action-label">Copy Result</span>
+        </button>
+        <button type="button" class="modal-action-btn" id="modalCopySlack">
+          <span class="action-icon slack-icon" aria-hidden="true"></span>
+          <span class="action-label">Copy for Slack</span>
+        </button>
+        <button type="button" class="modal-action-btn" id="modalShare">
+          <span class="action-icon" aria-hidden="true">↗</span>
+          <span class="action-label">Share</span>
+        </button>
+        <button type="button" class="modal-action-btn" id="modalUndo">
+          <span class="action-icon" aria-hidden="true">↩</span>
+          <span class="action-label">Undo</span>
+        </button>
+      </div>
+      <button type="button" class="btn-primary modal-again-btn" id="modalAgain">Spin Again</button>
+      <button type="button" class="modal-close-link" id="modalClose">Close</button>
     </div>
   </div>
 

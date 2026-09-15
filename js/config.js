@@ -1,6 +1,6 @@
 /** App constants */
 export const STORAGE_KEY = 'fairAdsSpinner_v5';
-export const APP_VERSION = 6;
+export const APP_VERSION = 7;
 export const VALID_MODES = ['fairBag', 'pureRandom', 'weighted', 'antiRepeat', 'lastExcluded', 'lowestFirst', 'strictBalance'];
 export const MODE_LABELS = {
   fairBag: 'Fair Bag',
@@ -27,7 +27,7 @@ export const MAX_NAMES = 12;
 export const MIN_NAMES = 2;
 export const MAX_HISTORY = 500;
 export const HISTORY_DEFAULT_SHOW = 50;
-export const SEG_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16', '#e879f9', '#fb7185'];
+export const SEG_COLORS = ['#facc15', '#f472b6', '#38bdf8', '#4ade80', '#a855f7', '#fb923c', '#14b8a6', '#f97316', '#06b6d4', '#84cc16', '#e879f9', '#fb7185'];
 
 export const SPEED_CONFIG = {
   quick:    { duration: 1.0, extraTurns: 3 },

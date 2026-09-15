@@ -14,7 +14,10 @@ export function bindDom() {
   el.resultModal = document.getElementById('resultModal');
   el.settingsPage = document.getElementById('settingsPage');
   el.modalWinner = document.getElementById('modalWinner');
+  el.modalWinnerAvatar = document.getElementById('modalWinnerAvatar');
+  el.modalTask = document.getElementById('modalTask');
   el.modalMessage = document.getElementById('modalMessage');
+  el.wheelRoundBadge = document.getElementById('wheelRoundBadge');
   el.nameListEl = document.getElementById('nameList');
   el.settingsError = document.getElementById('settingsError');
   el.helpModal = document.getElementById('helpModal');
