@@ -548,6 +548,11 @@ export function getEligibleNames() {
   return state.names.filter(n => !state.excluded[n]);
 }
 
+export function ensureNames() {
+  if (!Array.isArray(state.names)) state.names = [...DEFAULT_NAMES];
+  if (state.names.length < MIN_NAMES) state.names = [...DEFAULT_NAMES];
+}
+
 export function savePrefs() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -624,7 +629,7 @@ export function loadFromStorage() {
     if (typeof data.requireTaskBeforeSpin === 'boolean') state.requireTaskBeforeSpin = data.requireTaskBeforeSpin;
     if (typeof data.pinLockResetCounts === 'boolean') state.pinLockResetCounts = data.pinLockResetCounts;
   } catch (_) { /* ignore */ }
-  if (state.names.length < MIN_NAMES) state.names = [...DEFAULT_NAMES];
+  ensureNames();
   if (!state.taskPresets.length) state.taskPresets = [...DEFAULT_PRESETS];
 }
 
@@ -936,6 +941,7 @@ export function hideResultModal() {
 }
 
 export function spin() {
+  ensureNames();
   if (state.isSpinning || state.names.length < MIN_NAMES) return;
   const eligible = getEligibleNames();
   if (!eligible.length) {
@@ -1166,6 +1172,7 @@ export function renderHistoryList() {
 
 export function openHistory() {
   if (state.isSpinning) return;
+  ensureNames();
   state.historyShowAll = false;
   el.historySearch.value = '';
   el.historyFilterDate.value = '';
@@ -1323,6 +1330,7 @@ export function startDailyResetTimer() {
 
 export function openSettings() {
   if (state.isSpinning) return;
+  ensureNames();
   state.settingsDraft = [...state.names];
   state.settingsDraftExcluded = { ...state.excluded };
   el.settingsError.textContent = '';

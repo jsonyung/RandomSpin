@@ -6,6 +6,7 @@ app.setupServiceWorkerUpdates();
 app.setupInstallBanner();
 
 app.loadFromStorage();
+app.ensureNames();
 app.applyUrlParams();
 app.applyTheme(state.theme);
 app.syncModeSpeedUI();
